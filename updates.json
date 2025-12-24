@@ -1,0 +1,14 @@
+{
+    "addons": {
+        "uBird@celenity.dev": {
+            "updates": [
+                {
+                    "update_hash": "sha512:dff70893f502c0dc78018e5f9f957c3d3789b81cf0189a4cc2f5f99a9a25422dfcee9722c9c18e27391aed15ff81808a88325d60077390a089026b0594670f27",
+                    "update_info_url": "https://github.com/gorhill/uBlock/releases/tag/1.68.0",
+                    "update_link": "https://gitlab.com/celenityy/uBird/-/raw/13a6d4e2f8efe42981286fa4416ca6bc4cf17832/outputs/uBird_1.68.0.xpi",
+                    "version": "1.68.0"
+                }
+            ]
+        }
+    }
+}
