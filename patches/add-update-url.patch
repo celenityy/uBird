@@ -1,0 +1,14 @@
+diff --git a/platform/thunderbird/manifest.json b/platform/thunderbird/manifest.json
+index 16206f281..8559595a0 100644
+--- a/platform/thunderbird/manifest.json
++++ b/platform/thunderbird/manifest.json
+@@ -2,7 +2,8 @@
+   "browser_specific_settings": {
+     "gecko": {
+       "id": "uBlock0@raymondhill.net",
+-      "strict_min_version": "91.0"
++      "strict_min_version": "91.0",
++      "update_url": "{UBIRD_UPDATE_URL}"
+     }
+   },
+   "author": "Raymond Hill & contributors",

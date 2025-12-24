@@ -1,0 +1,6 @@
+patches:
+  - file: "add-update-url.patch"
+    name: "Add Update URL"
+    description: "Adds a custom update URL to uBlock Origin."
+    reason: "To allow uBird to automatically update."
+    effect: "uBird will automatically update."

@@ -1,0 +1,14 @@
+{
+    "addons": {
+        "uBird@celenity.dev": {
+            "updates": [
+                {
+                    "update_hash": "sha512:{SHA512SUM}",
+                    "update_info_url": "https://github.com/gorhill/uBlock/releases/tag/{UBLOCK_VERSION}",
+                    "update_link": "https://gitlab.com/celenityy/uBird/-/raw/{UBIRD_COMMIT}/outputs/uBird_{UBIRD_VERSION}.xpi",
+                    "version": "{UBLOCK_VERSION}"
+                }
+            ]
+        }
+    }
+}

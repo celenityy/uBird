@@ -61,6 +61,7 @@ popd
 echo "Writing ${ENV_SH}..."
 cat > "$ENV_SH" << EOF
 export outputdir="$OUTPUTDIR"
+export patches="$PATCHDIR"
 export rootdir="$ROOTDIR"
 export ublock_origin="$UBLOCKDIR"
 
