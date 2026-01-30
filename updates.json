@@ -3,10 +3,10 @@
         "uBird@celenity.dev": {
             "updates": [
                 {
-                    "update_hash": "sha512:533ab0a8518eca6abfb6fc349db056bb2a1c5ec409ce88c03938b0bdd73db49c93704392650422d1e9852a46e094360b39620e498c1cc2161da7e45e3e85cbf6",
+                    "update_hash": "sha512:3aa660c3cf0bfbe87f9ef3da0e8785fb65a5210af75dec334daf0bc564c85c4d561c3d83cb1397de2575228eee2e41ab1848f90788e8af52b9bf6fed01662537",
                     "update_info_url": "https://github.com/gorhill/uBlock/releases/tag/1.69.0",
-                    "update_link": "https://gitlab.com/celenityy/uBird/-/raw/05c1294b446aa6e7fa8d76e1c51abeb76c9f3fdf/outputs/uBird_1.69.0.xpi",
-                    "version": "1.69.0"
+                    "update_link": "https://gitlab.com/celenityy/uBird/-/raw/854520e0221b9634a0f3e8bd92906ccae29d4826/outputs/uBird_1.69.0.1.xpi",
+                    "version": "1.69.0.1"
                 }
             ]
         }
