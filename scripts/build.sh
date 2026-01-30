@@ -38,7 +38,7 @@ fi
 apply_patches
 
 # Set uBird version
-"${UBIRD_SED}" -i "s|{UBLOCK_VERSION}|${UBIRD_VERSION}|" "${UBIRD_UBO}/dist/version"
+"${UBIRD_SED}" -i "s|${UBLOCK_VERSION}|${UBIRD_VERSION}|" "${UBIRD_UBO}/dist/version"
 
 # Replace Add-on ID
 "${UBIRD_SED}" -i -e "s|\"id\": \".*\"|\"id\": \""${UBIRD_ADDON_ID}"\"|g" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
