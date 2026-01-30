@@ -1,6 +1,6 @@
 patches:
-  - file: "add-update-url.patch"
-    name: "Add Update URL"
-    description: "Adds a custom update URL to uBlock Origin."
-    reason: "To allow uBird to automatically update."
-    effect: "uBird will automatically update."
+  - file: "manifest.patch"
+    name: "Configure Extension Manifest"
+    description: "Adds a custom update URL to uBlock Origin, and sets the data collection permission to none."
+    reason: "To configure uBird's manifest, and to allow uBird to automatically update."
+    effect: "uBird will be configured as expected, and will automatically update."
