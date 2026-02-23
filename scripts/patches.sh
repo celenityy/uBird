@@ -11,10 +11,12 @@ GREEN="\033[0;32m"
 NC="\033[0m"
 
 declare -a PATCH_FILES
+declare -a ATN_PATCH_FILES
 
 PATCH_FILES=($(yq '.patches[].file' "$(dirname "$0")"/patches.yaml))
+ATN_PATCH_FILES=($(yq '.patches[].file' "$(dirname "$0")"/patches-atn.yaml))
 
-check_patch() {
+function check_patch() {
     patch="${UBIRD_PATCHES}/$1"
     if ! [[ -f "${patch}" ]]; then
         printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "$patch")"
@@ -29,7 +31,7 @@ check_patch() {
     fi
 }
 
-check_patches() {
+function check_patches() {
     for patch in "${PATCH_FILES[@]}"; do
         if ! check_patch "${patch}"; then
             return 1
@@ -37,7 +39,15 @@ check_patches() {
     done
 }
 
-test_patches() {
+function check_patches_atn() {
+    for patch in "${ATN_PATCH_FILES[@]}"; do
+        if ! check_patch "${patch}"; then
+            return 1
+        fi
+    done
+}
+
+function test_patches() {
     for patch in "${PATCH_FILES[@]}"; do
         if ! check_patch "${patch}" >/dev/null 2>&1; then
             printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
@@ -47,7 +57,17 @@ test_patches() {
     done
 }
 
-apply_patch() {
+function test_patches_atn() {
+    for patch in "${ATN_PATCH_FILES[@]}"; do
+        if ! check_patch "${patch}" >/dev/null 2>&1; then
+            printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+        else
+            printf "${GREEN}✓ %-45s: OK${NC}\n" "$(basename "${patch}")"
+        fi
+    done
+}
+
+function apply_patch() {
     name="$1"
     echo "Applying patch: ${name}"
     check_patch "${name}" || return 1
@@ -55,7 +75,7 @@ apply_patch() {
     return $?
 }
 
-apply_patches() {
+function apply_patches() {
     for patch in "${PATCH_FILES[@]}"; do
         if ! apply_patch "${patch}"; then
             printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
@@ -65,13 +85,29 @@ apply_patches() {
     done
 }
 
-list_patches() {
+function apply_patches_atn() {
+    for patch in "${ATN_PATCH_FILES[@]}"; do
+        if ! apply_patch "${patch}"; then
+            printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+            echo "Failed to apply ${patch}"
+            return 1
+        fi
+    done
+}
+
+function list_patches() {
     for patch in "${PATCH_FILES[@]}"; do
         echo "${patch}"
     done
 }
 
-slugify() {
+function list_patches_atn() {
+    for patch in "${ATN_PATCH_FILES[@]}"; do
+        echo "${patch}"
+    done
+}
+
+function slugify() {
     local input="$1"
     echo "${input}" |                  \
         tr '[:upper:]' '[:lower:]' | \
@@ -81,7 +117,7 @@ slugify() {
 
 # Function to rebase a single patch file atomically
 # Usage: rebase_patch <compatible_tag> <target_tag> <patch_file_path>
-rebase_patch() {
+function rebase_patch() {
     local compatible_tag="$1"
     local target_tag="$2"
     local patch_file="$3"
@@ -112,7 +148,7 @@ rebase_patch() {
 
     local branch_name="rebase-${patch_name}"
 
-    cleanup_and_rollback() {
+    function cleanup_and_rollback() {
         echo "Error occurred, rolling back changes..." >&2
 
         # Check if we're in the middle of a rebase and abort it
@@ -266,7 +302,7 @@ rebase_patch() {
 
 # Function to rebase multiple patch files
 # Usage: rebase_patches <compatible_tag> <target_tag> <patch_file1> [patch_file2] [...]
-rebase_patches() {
+function rebase_patches() {
     local compatible_tag="$1"
     local target_tag="$2"
 

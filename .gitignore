@@ -1,4 +1,5 @@
 .DS_Store
+/build/
 /env_override.sh
 /external/
 /scripts/env_local.sh

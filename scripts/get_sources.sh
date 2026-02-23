@@ -6,56 +6,27 @@ set -euo pipefail
 bash -x $(dirname $0)/env.sh
 source $(dirname $0)/env.sh
 
-# Include version info
-source "${UBIRD_VERSIONS}"
+# Set up target parameters
+if [[ -z "${1+x}" ]]; then
+    target='all'
+else
+    target=$(echo "${1}" | "${UBIRD_AWK}" '{print tolower($0)}')
+fi
 
-clone_repo() {
-    url="$1"
-    path="$2"
-    revision="$3"
+# Get sources
+export UBIRD_FROM_SOURCES=1
+if [ "${UBIRD_LOG_SOURCES}" == 1 ]; then
+    SOURCES_LOG_FILE="${UBIRD_LOG_DIR}/get_sources.log"
 
-    if [[ "${url}" == "" ]]; then
-        echo "URL missing for clone"
-        exit 1
+    # If the log file already exists, remove it
+    if [ -f "${SOURCES_LOG_FILE}" ]; then
+        rm "${SOURCES_LOG_FILE}"
     fi
 
-    if [[ "${path}" == "" ]]; then
-        echo "Path is required for cloning '${url}'"
-        exit 1
-    fi
+    # Ensure our log directory exists
+    mkdir -vp "${UBIRD_LOG_DIR}"
 
-    if [[ "${revision}" == "" ]]; then
-        echo "Revision is required for cloning '${url}'"
-        exit 1
-    fi
-
-    if [[ -f "${path}" ]]; then
-        echo "'${path}' exists and is not a directory"
-        exit 1
-    fi
-
-    if [[ -d "${path}" ]]; then
-        echo "'${path}' already exists"
-        read -p "Do you want to re-clone this repository? [y/N] " -n 1 -r
-        echo
-        if [[ "${REPLY}" =~ ^[Yy]$ ]]; then
-            echo "Removing ${path}..."
-            rm -rf "${path}"
-        else
-            return 0
-        fi
-    fi
-
-    echo "Cloning ${url}::${revision}"
-    git clone --revision="${revision}" --depth=1 "${url}" "${path}"
-}
-
-# Clone uBlock Origin
-echo "Cloning uBlock Origin..."
-clone_repo "https://github.com/gorhill/uBlock.git" "${UBIRD_UBO}" "${UBLOCK_COMMIT}"
-
-# Clone uAssets
-echo "Cloning uAssets..."
-pushd "${UBIRD_UBO}"
-bash -x "${UBIRD_UBO}/tools/pull-assets.sh"
-popd
+    bash -x "${UBIRD_SCRIPTS}/get_sources-ubird.sh" "${target}" > >(tee -a "${SOURCES_LOG_FILE}") 2>&1
+else
+    bash -x "${UBIRD_SCRIPTS}/get_sources-ubird.sh" "${target}"
+fi

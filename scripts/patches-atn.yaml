@@ -1,0 +1,6 @@
+patches:
+  - file: "manifest-atn.patch"
+    name: "Configure Extension Manifest (without specifying a custom update URL)"
+    description: "Sets uBird's data collection permission to none."
+    reason: "To configure uBird's manifest."
+    effect: "uBird will be configured as expected."

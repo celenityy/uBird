@@ -18,6 +18,9 @@ fi
 # Scripts directory
 export UBIRD_SCRIPTS="${UBIRD_ROOT}/scripts"
 
+# Build directory
+export UBIRD_BUILD="${UBIRD_ROOT}/build"
+
 # External sources directory
 export UBIRD_EXTERNAL="${UBIRD_ROOT}/external"
 
@@ -35,6 +38,31 @@ export UBIRD_VERSIONS="${UBIRD_SCRIPTS}/versions.sh"
 UBIRD_OUTPUTS_DEFAULT="${UBIRD_ROOT}/outputs"
 if [[ -z "${UBIRD_OUTPUTS+x}" ]]; then
     export UBIRD_OUTPUTS="${UBIRD_OUTPUTS_DEFAULT}"
+fi
+
+# Whether we're targeting ATN or self-distribution
+## (The only difference ATM is that ATN builds do not specify an update URL)
+UBIRD_ATN_DEFAULT=0
+if [[ -z "${UBIRD_ATN+x}" ]]; then
+    export UBIRD_ATN="${UBIRD_ATN_DEFAULT}"
+fi
+
+# Should we create a log file for build.sh? (Default)
+UBIRD_LOG_BUILD_DEFAULT=1
+if [[ -z "${UBIRD_LOG_BUILD+x}" ]]; then
+    export UBIRD_LOG_BUILD="${UBIRD_LOG_BUILD_DEFAULT}"
+fi
+
+# Should we create a log file for get_sources.sh? (Default)
+UBIRD_LOG_SOURCES_DEFAULT=1
+if [[ -z "${UBIRD_LOG_SOURCES+x}" ]]; then
+    export UBIRD_LOG_SOURCES="${UBIRD_LOG_SOURCES_DEFAULT}"
+fi
+
+# Directory where we should store log files (if logging is desired)
+UBIRD_LOG_DIR_DEFAULT="${UBIRD_BUILD}/logs"
+if [[ -z "${UBIRD_LOG_DIR+x}" ]]; then
+    export UBIRD_LOG_DIR="${UBIRD_LOG_DIR_DEFAULT}"
 fi
 
 # GNU awk
