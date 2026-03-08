@@ -24,6 +24,9 @@ export UBIRD_BUILD="${UBIRD_ROOT}/build"
 # External sources directory
 export UBIRD_EXTERNAL="${UBIRD_ROOT}/external"
 
+# External downloads/resources directory
+export UBIRD_DOWNLOADS="${UBIRD_EXTERNAL}/downloads"
+
 # Patches directory
 export UBIRD_PATCHES="${UBIRD_ROOT}/patches"
 
@@ -85,8 +88,36 @@ if [[ -z "${UBIRD_SED+x}" ]]; then
     export UBIRD_SED="${UBIRD_SED_DEFAULT}"
 fi
 
+# GNU tar
+if [[ "${UBIRD_OS}" == 'osx' ]]; then
+    UBIRD_TAR_DEFAULT='gtar'
+else
+    UBIRD_TAR_DEFAULT='tar'
+fi
+if [[ -z "${UBIRD_TAR+x}" ]]; then
+    export UBIRD_TAR="${UBIRD_TAR_DEFAULT}"
+fi
+
+# If curl flags are added, this determines whether they should be appended to our default flags (default),
+## or if they should override them entirely
+UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT=0
+if [[ -z "${UBIRD_CURL_FLAGS_OVERRIDE+x}" ]]; then
+    export UBIRD_CURL_FLAGS_OVERRIDE="${UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT}"
+fi
+
+# curl flags
+UBIRD_CURL_FLAGS_DEFAULT='-q --disable --no-netrc -j -e "" -A "" -S --clobber --create-dirs --delegation none --disallow-username-in-url --doh-cert-status --ftp-create-dirs --ftp-ssl-control --junk-session-cookies --no-basic --no-ca-native --no-digest --no-doh-insecure --no-http0.9 --no-insecure --no-proxy-insecure --no-negotiate --no-ntlm --no-proxy-basic --no-proxy-ca-native --no-proxy-digest --no-proxy-insecure --no-proxy-ntlm --no-proxy-ssl-allow-beast --no-proxy-ssl-auto-client-cert --no-sessionid --no-skip-existing --no-ssl --no-ssl-allow-beast --no-ssl-auto-client-cert --no-ssl-no-revoke --no-ssl-revoke-best-effort --no-tls-earlydata --no-xattr --progress-meter --proto -all,https --proto-default https --proto-redir -all,https --referer "" --remove-on-error --show-error --ssl-reqd --trace-time --user-agent "" --verbose'
+if [[ -z "${UBIRD_CURL_FLAGS+x}" ]]; then
+    export UBIRD_CURL_FLAGS_OVERRIDE=1
+    export UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
+elif [[ "${UBIRD_CURL_FLAGS_OVERRIDE}" == 1 ]]; then
+    export UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS}"
+else
+    export UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT} ${UBIRD_CURL_FLAGS}"
+fi
+
 # uBlock Origin
-UBIRD_UBO_DEFAULT="${UBIRD_EXTERNAL}/uBlock"
+UBIRD_UBO_DEFAULT="${UBIRD_EXTERNAL}/ublock"
 if [[ -z "${UBIRD_UBO+x}" ]]; then
     export UBIRD_UBO="${UBIRD_UBO_DEFAULT}"
 fi
