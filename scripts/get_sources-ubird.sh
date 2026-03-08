@@ -20,13 +20,19 @@ UBIRD_GET_SOURCE_UBLOCK=0
 if [ "${target}" == 'uassets' ]; then
     # Get uAssets
     UBIRD_GET_SOURCE_UASSETS=1
-elif [ "${target}" == 'up-ac' ]; then
+elif [ "${target}" == 'ublock' ]; then
     # Get uBlock Origin
     UBIRD_GET_SOURCE_UBLOCK=1
-else
+elif [ "${target}" == 'all' ]; then
     # If no argument is specified (or argument is set to "all"), just build everything
     UBIRD_GET_SOURCE_UASSETS=1
     UBIRD_GET_SOURCE_UBLOCK=1
+else
+    echo_red_text "ERROR: Invalid target: ${target}\n You must enter one of the following:"
+    echo 'All: all (Default)'
+    echo 'uAssets: uassets'
+    echo 'uBlock Origin: ublock'
+    exit 1
 fi
 
 # Include version info
