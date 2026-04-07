@@ -5,7 +5,7 @@
                 {
                     "update_hash": "sha512:{SHA512SUM}",
                     "update_info_url": "https://github.com/gorhill/uBlock/releases/tag/{UBLOCK_VERSION}",
-                    "update_link": "https://gitlab.com/celenityy/uBird/-/raw/{UBIRD_COMMIT}/outputs/uBird_{UBIRD_VERSION}.xpi",
+                    "update_link": "https://gitlab.com/celenityy/uBird/-/raw/{UBIRD_COMMIT}/outputs/uBird_{UBIRD_VERSION}-unsigned.xpi",
                     "version": "{UBIRD_VERSION}"
                 }
             ]

@@ -5,7 +5,7 @@
                 {
                     "update_hash": "sha512:885775fc206359fd58a38b24d588f538efd3cb73c93542d771cc6146d56138605f9cee2174a52dc5ec2582072048fb1c25defb04e849704cc2dfa1074fd62d38",
                     "update_info_url": "https://github.com/gorhill/uBlock/releases/tag/1.70.0",
-                    "update_link": "https://gitlab.com/celenityy/uBird/-/raw/efa3c0e9f8c514e67a350075c275c101a1142fb2/outputs/uBird_1.70.0.xpi",
+                    "update_link": "https://gitlab.com/celenityy/uBird/-/raw/efa3c0e9f8c514e67a350075c275c101a1142fb2/outputs/uBird_1.70.0-unsigned.xpi",
                     "version": "1.70.0"
                 }
             ]
