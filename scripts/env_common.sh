@@ -154,6 +154,22 @@ else
 fi
 export UBIRD_CURL_FLAGS
 
+## uAssets (main)
+readonly UBIRD_UASSETS_MAIN_DEFAULT="${UBIRD_EXTERNAL}/uassets-main"
+if [[ -z "${UBIRD_UASSETS_MAIN+x}" ]]; then
+    UBIRD_UASSETS_MAIN="${UBIRD_UASSETS_MAIN_DEFAULT}"
+fi
+readonly UBIRD_UASSETS_MAIN
+export UBIRD_UASSETS_MAIN
+
+## uAssets (prod)
+readonly UBIRD_UASSETS_PROD_DEFAULT="${UBIRD_EXTERNAL}/uassets-prod"
+if [[ -z "${UBIRD_UASSETS_PROD+x}" ]]; then
+    UBIRD_UASSETS_PROD="${UBIRD_UASSETS_PROD_DEFAULT}"
+fi
+readonly UBIRD_UASSETS_PROD
+export UBIRD_UASSETS_PROD
+
 # uBlock Origin
 readonly UBIRD_UBO_DEFAULT="${UBIRD_EXTERNAL}/ublock"
 if [[ -z "${UBIRD_UBO+x}" ]]; then

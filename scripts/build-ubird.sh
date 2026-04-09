@@ -17,17 +17,58 @@ fi
 source "${UBIRD_VERSIONS}"
 
 if [[ -z "${UBIRD_ADDON_ID}" ]]; then
-    echo "\${UBIRD_ADDON_ID} is not set! Aborting..."
+    echo_red_text 'ERROR: The UBIRD_ADDON_ID environment variable is missing! Aborting...'
     exit 1
 fi
 
 if [[ -z "${UBIRD_UPDATE_URL}" ]]; then
-    echo "\${UBIRD_UPDATE_URL} is not set! Aborting..."
+    echo_red_text 'ERROR: The UBIRD_UPDATE_URL environment variable is missing! Aborting...'
     exit 1
 fi
 
 if [[ -z "${UBIRD_VERSION}" ]]; then
-    echo "\${UBIRD_VERSION} is not set! Aborting..."
+    echo_red_text 'ERROR: The UBIRD_VERSION environment variable is missing! Aborting...'
+    exit 1
+fi
+
+if [[ -z "${UBLOCK_VERSION}" ]]; then
+    echo_red_text 'ERROR: The UBLOCK_VERSION environment variable is missing! Aborting...'
+    exit 1
+fi
+
+if [[ -z "${UBIRD_UBO}" ]]; then
+    echo_red_text 'ERROR: The UBIRD_UBO environment variable is missing! Aborting...'
+    exit 1
+fi
+
+if ! [[ -d "${UBIRD_UBO}" ]]; then
+    echo_red_text "ERROR: uBlock Origin not found! (${UBIRD_UBO})"
+    echo_green_text "Please ensure the UBIRD_UBO environment variable is set to the correct path in which uBlock Origin is located."
+    echo_red_text "Aborting..."
+    exit 1
+fi
+
+if [[ -z "${UBIRD_UASSETS_MAIN}" ]]; then
+    echo_red_text 'ERROR: The UBIRD_UASSETS_MAIN environment variable is missing! Aborting...'
+    exit 1
+fi
+
+if ! [[ -d "${UBIRD_UASSETS_MAIN}" ]]; then
+    echo_red_text "ERROR: uAssets (main) not found! (${UBIRD_UASSETS_MAIN})"
+    echo_green_text "Please ensure the UBIRD_UASSETS_MAIN environment variable is set to the correct path in which uAssets (main) is located."
+    echo_red_text "Aborting..."
+    exit 1
+fi
+
+if [[ -z "${UBIRD_UASSETS_PROD}" ]]; then
+    echo_red_text 'ERROR: The UBIRD_UASSETS_PROD environment variable is missing! Aborting...'
+    exit 1
+fi
+
+if ! [[ -d "${UBIRD_UASSETS_PROD}" ]]; then
+    echo_red_text "ERROR: uAssets (prod) not found! (${UBIRD_UASSETS_PROD})"
+    echo_green_text "Please ensure the UBIRD_UASSETS_PROD environment variable is set to the correct path in which uAssets (prod) is located."
+    echo_red_text "Aborting..."
     exit 1
 fi
 
@@ -40,7 +81,7 @@ mkdir -p "${UBIRD_OUTPUTS}"
 # For checking/applying patch files
 source "${UBIRD_SCRIPTS}/patches.sh"
 
-if [[ ! -f "${UBIRD_BUILD}/temp-manifest.json" ]]; then
+if ! [[ -f "${UBIRD_BUILD}/temp-manifest.json" ]]; then
     cp "${UBIRD_UBO}/platform/thunderbird/manifest.json" "${UBIRD_BUILD}/temp-manifest.json"
 fi
 
@@ -58,16 +99,35 @@ function prep_check_patches() {
     fi
 }
 
+function set_version() {
+    # Set uBird version
+    pushd "${UBIRD_UBO}"
+    "${UBIRD_SED}" -i "s|${UBLOCK_VERSION}|${UBIRD_VERSION}|" "${UBIRD_UBO}/dist/version"
+    popd
+}
+
 function prep_ubird() {
     # uBird
     echo_red_text 'Preparing your build environment...'
     pushd "${UBIRD_UBO}"
 
     if [[ -f "${UBIRD_UBO}/platform/thunderbird/manifest.json" ]]; then
-        rm -f "${UBIRD_UBO}/platform/thunderbird/manifest.json"
+        rm "${UBIRD_UBO}/platform/thunderbird/manifest.json"
     fi
 
     cp -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
+
+    if ! [[ -d "${UBIRD_UBO}/dist/build/uAssets" ]]; then
+        mkdir -p "${UBIRD_UBO}/dist/build/uAssets"
+    fi
+
+    if ! [[ -d "${UBIRD_UBO}/dist/build/uAssets/main" ]]; then
+        ln -s "${UBIRD_UASSETS_MAIN}" "${UBIRD_UBO}/dist/build/uAssets/main"
+    fi
+
+    if ! [[ -d "${UBIRD_UBO}/dist/build/uAssets/prod" ]]; then
+        ln -s "${UBIRD_UASSETS_PROD}" "${UBIRD_UBO}/dist/build/uAssets/prod"
+    fi
 
     # Check patches
     prep_check_patches
@@ -112,10 +172,6 @@ function build_ubird() {
     echo_green_text "SUCCESS: Built uBird ${UBIRD_VERSION}"
 }
 
-# Set uBird version
-pushd "${UBIRD_UBO}"
-"${UBIRD_SED}" -i "s|${UBLOCK_VERSION}|${UBIRD_VERSION}|" "${UBIRD_UBO}/dist/version"
-popd
-
+set_version
 prep_ubird
 build_ubird

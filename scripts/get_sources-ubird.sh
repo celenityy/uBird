@@ -17,27 +17,34 @@ readonly target="$1"
 readonly mode="$2"
 
 # Set-up target parameters
-UBIRD_GET_SOURCE_UASSETS=0
+UBIRD_GET_SOURCE_UASSETS_MAIN=0
+UBIRD_GET_SOURCE_UASSETS_PROD=0
 UBIRD_GET_SOURCE_UBLOCK=0
 
-if [ "${target}" == 'uassets' ]; then
-    # Get uAssets
-    UBIRD_GET_SOURCE_UASSETS=1
+if [ "${target}" == 'uassets-main' ]; then
+    # Get uAssets (main)
+    UBIRD_GET_SOURCE_UASSETS_MAIN=1
+elif [ "${target}" == 'uassets-prod' ]; then
+    # Get uAssets (prod)
+    UBIRD_GET_SOURCE_UASSETS_PROD=1
 elif [ "${target}" == 'ublock' ]; then
     # Get uBlock Origin
     UBIRD_GET_SOURCE_UBLOCK=1
 elif [ "${target}" == 'all' ]; then
     # If no argument is specified (or argument is set to "all"), just build everything
-    UBIRD_GET_SOURCE_UASSETS=1
+    UBIRD_GET_SOURCE_UASSETS_MAIN=1
+    UBIRD_GET_SOURCE_UASSETS_PROD=1
     UBIRD_GET_SOURCE_UBLOCK=1
 else
     echo_red_text "ERROR: Invalid target: ${target}\n You must enter one of the following:"
     echo 'All: all (Default)'
-    echo 'uAssets: uassets'
+    echo 'uAssets (main): uassets-main'
+    echo 'uAssets (prod): uassets-prod'
     echo 'uBlock Origin: ublock'
     exit 1
 fi
-readonly UBIRD_GET_SOURCE_UASSETS
+readonly UBIRD_GET_SOURCE_UASSETS_MAIN
+readonly UBIRD_GET_SOURCE_UASSETS_PROD
 readonly UBIRD_GET_SOURCE_UBLOCK
 
 # If the 'checksum-update' argument is specified, in addition to downloading the dependencies as usual,
@@ -62,7 +69,15 @@ function update_sha512sum() {
     local readonly new_sha512sum="$2"
     local readonly file="$3"
 
-    if [ "${old_sha512sum}" == "${UBLOCK_SHA512SUM}" ]; then
+    if [ "${old_sha512sum}" == "${UASSETS_MAIN_SHA512SUM}" ]; then
+        echo_red_text 'Updating SHA512sum for uAssets (main)...'
+        "${UBIRD_SED}" -i -e "s|UASSETS_MAIN_SHA512SUM='.*'|UASSETS_MAIN_SHA512SUM='"${new_sha512sum}"'|g" "${UBIRD_VERSIONS}"
+        echo_green_text 'SUCCESS: Updated SHA512sum for uAssets (main)'
+    elif [ "${old_sha512sum}" == "${UASSETS_PROD_SHA512SUM}" ]; then
+        echo_red_text 'Updating SHA512sum for uAssets (prod)...'
+        "${UBIRD_SED}" -i -e "s|UASSETS_PROD_SHA512SUM='.*'|UASSETS_PROD_SHA512SUM='"${new_sha512sum}"'|g" "${UBIRD_VERSIONS}"
+        echo_green_text 'SUCCESS: Updated SHA512sum for uAssets (prod)'
+    elif [ "${old_sha512sum}" == "${UBLOCK_SHA512SUM}" ]; then
         echo_red_text 'Updating SHA512sum for uBlock Origin...'
         "${UBIRD_SED}" -i -e "s|UBLOCK_SHA512SUM='.*'|UBLOCK_SHA512SUM='"${new_sha512sum}"'|g" "${UBIRD_VERSIONS}"
         echo_green_text 'SUCCESS: Updated SHA512sum for uBlock Origin'
@@ -257,37 +272,37 @@ function download_and_extract() {
 function get_ublock() {
     echo_red_text 'Downloading uBlock Origin...'
     download_and_extract 'ublock' "https://github.com/gorhill/uBlock/archive/${UBLOCK_COMMIT}.tar.gz" "${UBIRD_UBO}" "${UBLOCK_SHA512SUM}"
-    echo_green_text "SUCCESS: Set-up uBlock Origin at ${UBIRD_UBO}"
+    if [ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]; then
+        echo_green_text "SUCCESS: Set-up uBlock Origin at ${UBIRD_UBO}"
+    fi
 }
 
-# Get uAssets
-function get_uassets() {
-    if  [[ ! -d "${UBIRD_UBO}" ]]; then
-        echo_red_text "ERROR: You tried to get uAssets, but you don't have uBlock Origin set-up yet."
-        exit 1
+# Get uAssets (main)
+function get_uassets_main() {
+    echo_red_text 'Downloading uAssets (main)...'
+    download_and_extract 'uassets-main' "https://github.com/uBlockOrigin/uAssets/archive/${UASSETS_MAIN_COMMIT}.tar.gz" "${UBIRD_UASSETS_MAIN}" "${UASSETS_MAIN_SHA512SUM}"
+    if [ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]; then
+        echo_green_text "SUCCESS: Set-up uAssets (main) at ${UBIRD_UASSETS_MAIN}"
     fi
-
-    if [[ -d "${UBIRD_UBO}/dist/build/uAssets" ]]; then
-        echo_red_text "uAssets is already set-up at ${UBIRD_UBO}/dist/build/uAssets"
-        read -p "Do you want to re-create it? [y/N] " -n 1 -r
-        echo
-        if [[ "${REPLY}" =~ ^[Yy]$ ]]; then
-            rm -rf "${UBIRD_UBO}/dist/build/uAssets"
-        fi
-    fi
-
-    echo_red_text "Cloning uAssets..."
-    pushd "${UBIRD_UBO}"
-    bash -x "${UBIRD_UBO}/tools/pull-assets.sh"
-    popd
-    echo_green_text "SUCCESS: Set-up uAssets at ${UBIRD_UBO}/dist/build/uAssets"
 }
 
-# This needs to run before we get uAssets
-if [ "${UBIRD_GET_SOURCE_UBLOCK}" == 1 ]; then
-    get_ublock
+# Get uAssets (prod)
+function get_uassets_prod() {
+    echo_red_text 'Downloading uAssets (prod)...'
+    download_and_extract 'uassets-prod' "https://github.com/uBlockOrigin/uAssets/archive/${UASSETS_PROD_COMMIT}.tar.gz" "${UBIRD_UASSETS_PROD}" "${UASSETS_PROD_SHA512SUM}"
+    if [ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]; then
+        echo_green_text "SUCCESS: Set-up uAssets (prod) at ${UBIRD_UASSETS_PROD}"
+    fi
+}
+
+if [ "${UBIRD_GET_SOURCE_UASSETS_MAIN}" == 1 ]; then
+    get_uassets_main
 fi
 
-if [ "${UBIRD_GET_SOURCE_UASSETS}" == 1 ]; then
-    get_uassets
+if [ "${UBIRD_GET_SOURCE_UASSETS_PROD}" == 1 ]; then
+    get_uassets_prod
+fi
+
+if [ "${UBIRD_GET_SOURCE_UBLOCK}" == 1 ]; then
+    get_ublock
 fi
