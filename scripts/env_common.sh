@@ -8,7 +8,7 @@
 
 # If variables are defined with a custom `env_override.sh` file (located at the root project directory), let's use those
 ## These need to be set first, to ensure that they don't interfere with certain variables
-UBIRD_ENV_OVERRIDE="${UBIRD_ROOT}/env_override.sh"
+readonly UBIRD_ENV_OVERRIDE="${UBIRD_ROOT}/env_override.sh"
 if [[ -f "${UBIRD_ENV_OVERRIDE}" ]]; then
     source "${UBIRD_ENV_OVERRIDE}"
 fi
@@ -16,122 +16,161 @@ fi
 # uBird
 
 # Scripts directory
-export UBIRD_SCRIPTS="${UBIRD_ROOT}/scripts"
+readonly UBIRD_SCRIPTS="${UBIRD_ROOT}/scripts"
+export UBIRD_SCRIPTS
+
+## uBird utilities
+readonly UBIRD_UTILS="${UBIRD_SCRIPTS}/utilities.sh"
+export UBIRD_UTILS
 
 # Build directory
-export UBIRD_BUILD="${UBIRD_ROOT}/build"
+readonly UBIRD_BUILD="${UBIRD_ROOT}/build"
+export UBIRD_BUILD
 
 # External sources directory
-export UBIRD_EXTERNAL="${UBIRD_ROOT}/external"
+readonly UBIRD_EXTERNAL="${UBIRD_ROOT}/external"
+export UBIRD_EXTERNAL
 
 # External downloads/resources directory
-export UBIRD_DOWNLOADS="${UBIRD_EXTERNAL}/downloads"
+readonly UBIRD_DOWNLOADS="${UBIRD_EXTERNAL}/downloads"
+export UBIRD_DOWNLOADS
 
 # Patches directory
-export UBIRD_PATCHES="${UBIRD_ROOT}/patches"
+readonly UBIRD_PATCHES="${UBIRD_ROOT}/patches"
+export UBIRD_PATCHES
 
 # Set our platform and OS
-export UBIRD_ENV_HELPERS="${UBIRD_SCRIPTS}/env_helpers.sh"
+readonly UBIRD_ENV_HELPERS="${UBIRD_SCRIPTS}/env_helpers.sh"
+export UBIRD_ENV_HELPERS
 source "${UBIRD_ENV_HELPERS}"
 
 # Version info
-export UBIRD_VERSIONS="${UBIRD_SCRIPTS}/versions.sh"
+readonly UBIRD_VERSIONS="${UBIRD_SCRIPTS}/versions.sh"
+export UBIRD_VERSIONS
 
 # uBird outputs directory
-UBIRD_OUTPUTS_DEFAULT="${UBIRD_ROOT}/outputs"
+readonly UBIRD_OUTPUTS_DEFAULT="${UBIRD_ROOT}/outputs"
 if [[ -z "${UBIRD_OUTPUTS+x}" ]]; then
-    export UBIRD_OUTPUTS="${UBIRD_OUTPUTS_DEFAULT}"
+    UBIRD_OUTPUTS="${UBIRD_OUTPUTS_DEFAULT}"
 fi
+readonly UBIRD_OUTPUTS
+export UBIRD_OUTPUTS
 
 # Whether we're targeting ATN or self-distribution
 ## (The only difference ATM is that ATN builds do not specify an update URL)
-UBIRD_ATN_DEFAULT=0
+readonly UBIRD_ATN_DEFAULT=0
 if [[ -z "${UBIRD_ATN+x}" ]]; then
-    export UBIRD_ATN="${UBIRD_ATN_DEFAULT}"
+    UBIRD_ATN="${UBIRD_ATN_DEFAULT}"
 fi
+readonly UBIRD_ATN
+export UBIRD_ATN
 
 # Should we create a log file for build.sh? (Default)
-UBIRD_LOG_BUILD_DEFAULT=1
+readonly UBIRD_LOG_BUILD_DEFAULT=1
 if [[ -z "${UBIRD_LOG_BUILD+x}" ]]; then
-    export UBIRD_LOG_BUILD="${UBIRD_LOG_BUILD_DEFAULT}"
+    UBIRD_LOG_BUILD="${UBIRD_LOG_BUILD_DEFAULT}"
 fi
+readonly UBIRD_LOG_BUILD
+export UBIRD_LOG_BUILD
 
 # Should we create a log file for get_sources.sh? (Default)
-UBIRD_LOG_SOURCES_DEFAULT=1
+readonly UBIRD_LOG_SOURCES_DEFAULT=1
 if [[ -z "${UBIRD_LOG_SOURCES+x}" ]]; then
-    export UBIRD_LOG_SOURCES="${UBIRD_LOG_SOURCES_DEFAULT}"
+    UBIRD_LOG_SOURCES="${UBIRD_LOG_SOURCES_DEFAULT}"
 fi
+readonly UBIRD_LOG_SOURCES
+export UBIRD_LOG_SOURCES
 
 # Directory where we should store log files (if logging is desired)
-UBIRD_LOG_DIR_DEFAULT="${UBIRD_BUILD}/logs"
+readonly UBIRD_LOG_DIR_DEFAULT="${UBIRD_BUILD}/logs"
 if [[ -z "${UBIRD_LOG_DIR+x}" ]]; then
-    export UBIRD_LOG_DIR="${UBIRD_LOG_DIR_DEFAULT}"
+    UBIRD_LOG_DIR="${UBIRD_LOG_DIR_DEFAULT}"
 fi
+readonly UBIRD_LOG_DIR
+export UBIRD_LOG_DIR
 
 # GNU awk
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
-    UBIRD_AWK_DEFAULT='gawk'
+    readonly UBIRD_AWK_DEFAULT='gawk'
 else
-    UBIRD_AWK_DEFAULT='awk'
+    readonly UBIRD_AWK_DEFAULT='awk'
 fi
 if [[ -z "${UBIRD_AWK+x}" ]]; then
-    export UBIRD_AWK="${UBIRD_AWK_DEFAULT}"
+    UBIRD_AWK="${UBIRD_AWK_DEFAULT}"
 fi
+readonly UBIRD_AWK
+export UBIRD_AWK
 
 # GNU sed
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
-    UBIRD_SED_DEFAULT='gsed'
+    readonly UBIRD_SED_DEFAULT='gsed'
 else
-    UBIRD_SED_DEFAULT='sed'
+    readonly UBIRD_SED_DEFAULT='sed'
 fi
 if [[ -z "${UBIRD_SED+x}" ]]; then
-    export UBIRD_SED="${UBIRD_SED_DEFAULT}"
+    UBIRD_SED="${UBIRD_SED_DEFAULT}"
 fi
+readonly UBIRD_SED
+export UBIRD_SED
 
 # GNU tar
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
-    UBIRD_TAR_DEFAULT='gtar'
+    readonly UBIRD_TAR_DEFAULT='gtar'
 else
-    UBIRD_TAR_DEFAULT='tar'
+    readonly UBIRD_TAR_DEFAULT='tar'
 fi
 if [[ -z "${UBIRD_TAR+x}" ]]; then
-    export UBIRD_TAR="${UBIRD_TAR_DEFAULT}"
+    UBIRD_TAR="${UBIRD_TAR_DEFAULT}"
 fi
+readonly UBIRD_TAR
+export UBIRD_TAR
 
 # If curl flags are added, this determines whether they should be appended to our default flags (default),
 ## or if they should override them entirely
-UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT=0
+readonly UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT=0
 if [[ -z "${UBIRD_CURL_FLAGS_OVERRIDE+x}" ]]; then
-    export UBIRD_CURL_FLAGS_OVERRIDE="${UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT}"
+    UBIRD_CURL_FLAGS_OVERRIDE="${UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT}"
 fi
+readonly UBIRD_CURL_FLAGS_OVERRIDE
+export UBIRD_CURL_FLAGS_OVERRIDE
 
 # curl flags
-UBIRD_CURL_FLAGS_DEFAULT='-q --disable --no-netrc -j -e "" -A "" -S --clobber --create-dirs --delegation none --disallow-username-in-url --doh-cert-status --ftp-create-dirs --ftp-ssl-control --junk-session-cookies --no-basic --no-ca-native --no-digest --no-doh-insecure --no-http0.9 --no-insecure --no-proxy-insecure --no-negotiate --no-ntlm --no-proxy-basic --no-proxy-ca-native --no-proxy-digest --no-proxy-insecure --no-proxy-ntlm --no-proxy-ssl-allow-beast --no-proxy-ssl-auto-client-cert --no-sessionid --no-skip-existing --no-ssl --no-ssl-allow-beast --no-ssl-auto-client-cert --no-ssl-no-revoke --no-ssl-revoke-best-effort --no-tls-earlydata --no-xattr --progress-meter --proto -all,https --proto-default https --proto-redir -all,https --referer "" --remove-on-error --show-error --ssl-reqd --trace-time --user-agent "" --verbose'
+readonly UBIRD_CURL_FLAGS_DEFAULT='-q --disable --no-netrc -j -e "" -A "" -S --clobber --create-dirs --delegation none --disallow-username-in-url --doh-cert-status --ftp-create-dirs --ftp-ssl-control --junk-session-cookies --no-basic --no-ca-native --no-digest --no-doh-insecure --no-http0.9 --no-insecure --no-proxy-insecure --no-negotiate --no-ntlm --no-proxy-basic --no-proxy-ca-native --no-proxy-digest --no-proxy-insecure --no-proxy-ntlm --no-proxy-ssl-allow-beast --no-proxy-ssl-auto-client-cert --no-sessionid --no-skip-existing --no-ssl --no-ssl-allow-beast --no-ssl-auto-client-cert --no-ssl-no-revoke --no-ssl-revoke-best-effort --no-tls-earlydata --no-xattr --progress-meter --proto -all,https --proto-default https --proto-redir -all,https --referer "" --remove-on-error --show-error --ssl-reqd --trace-time --user-agent "" --verbose'
 if [[ -z "${UBIRD_CURL_FLAGS+x}" ]]; then
-    export UBIRD_CURL_FLAGS_OVERRIDE=1
-    export UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
+    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
 elif [[ "${UBIRD_CURL_FLAGS_OVERRIDE}" == 1 ]]; then
-    export UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS}"
+    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS}"
 else
-    export UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT} ${UBIRD_CURL_FLAGS}"
+    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT} ${UBIRD_CURL_FLAGS}"
 fi
+export UBIRD_CURL_FLAGS
 
 # uBlock Origin
-UBIRD_UBO_DEFAULT="${UBIRD_EXTERNAL}/ublock"
+readonly UBIRD_UBO_DEFAULT="${UBIRD_EXTERNAL}/ublock"
 if [[ -z "${UBIRD_UBO+x}" ]]; then
-    export UBIRD_UBO="${UBIRD_UBO_DEFAULT}"
+    UBIRD_UBO="${UBIRD_UBO_DEFAULT}"
 fi
+readonly UBIRD_UBO
+export UBIRD_UBO
 
 # uBird add-on ID
-UBIRD_ADDON_ID_DEFAULT='uBird@celenity.dev'
+readonly UBIRD_ADDON_ID_DEFAULT='uBird@celenity.dev'
 if [[ -z "${UBIRD_ADDON_ID+x}" ]]; then
     # By default, use "uBird@celenity.dev" for the add-on ID
-    export UBIRD_ADDON_ID="${UBIRD_ADDON_ID_DEFAULT}"
+    UBIRD_ADDON_ID="${UBIRD_ADDON_ID_DEFAULT}"
 fi
+readonly UBIRD_ADDON_ID
+export UBIRD_ADDON_ID
 
 # uBird update URL
-UBIRD_UPDATE_URL_DEFAULT='https://gitlab.com/celenityy/uBird/-/raw/main/updates.json'
+readonly UBIRD_UPDATE_URL_DEFAULT='https://gitlab.com/celenityy/uBird/-/raw/main/updates.json'
 if [[ -z "${UBIRD_UPDATE_URL+x}" ]]; then
     # By default, use our GitLab update URL
-    export UBIRD_UPDATE_URL="${UBIRD_UPDATE_URL_DEFAULT}"
+    UBIRD_UPDATE_URL="${UBIRD_UPDATE_URL_DEFAULT}"
 fi
+readonly UBIRD_UPDATE_URL
+export UBIRD_UPDATE_URL
+
+# We've now set our environment variables...
+readonly UBIRD_SET_ENVS=1
+export UBIRD_SET_ENVS

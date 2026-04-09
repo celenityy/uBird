@@ -3,13 +3,16 @@
 set -euo pipefail
 
 # Set-up our environment
-bash -x $(dirname $0)/env.sh
+if [[ -z "${UBIRD_SET_ENVS+x}" ]]; then
+    bash -x $(dirname $0)/env.sh
+fi
 source $(dirname $0)/env.sh
 
 # Build uBird
-export UBIRD_FROM_BUILD=1
+readonly UBIRD_FROM_BUILD=1
+export UBIRD_FROM_BUILD
 if [ "${UBIRD_LOG_BUILD}" == 1 ]; then
-    BUILD_LOG_FILE="${UBIRD_LOG_DIR}/build.log"
+    readonly BUILD_LOG_FILE="${UBIRD_LOG_DIR}/build.log"
 
     # If the log file already exists, remove it
     if [ -f "${BUILD_LOG_FILE}" ]; then

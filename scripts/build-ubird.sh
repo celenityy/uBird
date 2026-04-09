@@ -3,8 +3,10 @@
 set -euo pipefail
 
 # Set-up our environment
-bash -x $(dirname $0)/env.sh
 source $(dirname $0)/env.sh
+
+# Include utilities
+source "${UBIRD_UTILS}"
 
 if [[ -z "${UBIRD_FROM_BUILD+x}" ]]; then
     echo_red_text 'ERROR: Do not call build-ubird.sh directly. Instead, use build.sh.' >&1
@@ -101,9 +103,9 @@ function build_ubird() {
     popd
     
     if [ "${UBIRD_ATN}" == 1 ]; then
-        UBIRD_FILE_NAME="uBird_${UBIRD_VERSION}-atn"
+        local readonly UBIRD_FILE_NAME="uBird_${UBIRD_VERSION}-atn"
     else
-        UBIRD_FILE_NAME="uBird_${UBIRD_VERSION}"
+        local readonly UBIRD_FILE_NAME="uBird_${UBIRD_VERSION}"
     fi
 
     cp "${UBIRD_UBO}/dist/build/uBlock0.thunderbird.xpi" "${UBIRD_OUTPUTS}/${UBIRD_FILE_NAME}.xpi"
