@@ -3,20 +3,20 @@
 
 ## uBlock Origin
 ### https://github.com/gorhill/uBlock
-### (This commit corresponds to https://github.com/gorhill/uBlock/releases/tag/1.70.0)
-readonly UBLOCK_COMMIT='3703f5efb82dde5aaaaf590a3a37550fcd34160d'
-readonly UBLOCK_SHA512SUM='cebc82db0c2032d3864470876ee226293f1b6b4d38b46c7c350323c5f2c98f34a5bb32bc4dd9da1d2d11209ea3d1becb430a33296d9d39a386d13783d54a99fa'
-readonly UBLOCK_VERSION='1.70.0'
+### (This commit corresponds to https://github.com/gorhill/uBlock/releases/tag/1.71.0)
+readonly UBLOCK_COMMIT='4a738e226f17ba8b854bc411871607704e46aad8'
+readonly UBLOCK_SHA512SUM='ecb8a6d3ad54ce0fb41340b4691bff6ba30f1797063de1482c74cfe968f2fd4ecb29c6c8c19a9d9f859b5e7e93a3b2977def29a0fad7c8ec80b67ccee88152de'
+readonly UBLOCK_VERSION='1.71.0'
 
 readonly UBIRD_VERSION="${UBLOCK_VERSION}"
 
 ## uAssets (main)
 ### https://github.com/uBlockOrigin/uAssets/tree/master
-readonly UASSETS_MAIN_COMMIT='e5821694630be7d8909f54213809d28151356b9d'
-readonly UASSETS_MAIN_SHA512SUM='0189d0a436d296fb589b39115b9b7cbd33dc453f56b31142b1244a53e49654a83dac0cd4cdcfdc09601406cbd34490013d83b35625c3ed54f8984ea6415e89f4'
+readonly UASSETS_MAIN_COMMIT='f4cb5e262545507bf4a33d3725cb63c526074361'
+readonly UASSETS_MAIN_SHA512SUM='edc30556fdadad7516c412cff78d2814833470773f446d2486aeca96814dd52fc34e4cb497eae423b5de6660b0d13f4a02a35d94820b3b9b09e2397f00a2c8bf'
 
 ## uAssets (prod)
 ### https://github.com/uBlockOrigin/uAssets/tree/gh-pages
-readonly UASSETS_PROD_COMMIT='7b8c1a71ccd8587861a4d466c7c29d75a6f116a0'
-readonly UASSETS_PROD_SHA512SUM='e8cae28e03ca34dfdf58096353d36b50854be0b99b3045134769982fb1480f2ee192b48fd25815b7aefe0ba2c03c1cfb31dce66f4ac83f2e45ab54e2772aea00'
+readonly UASSETS_PROD_COMMIT='bbb7c23776203fd9b8c77302a4c7f580a6eebb7a'
+readonly UASSETS_PROD_SHA512SUM='434a7fb5dfe39813243730037ceb046905f2eb6f30fcedaf85fb4886c78366a09559ef0fe682a8ea9d9bbe74b699584a7cdc181a44a14a7d5baf61e92191fe6d'
 
