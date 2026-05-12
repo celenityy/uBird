@@ -48,7 +48,7 @@ source "${UBIRD_ENV_HELPERS}"
 readonly UBIRD_VERSIONS="${UBIRD_SCRIPTS}/versions.sh"
 export UBIRD_VERSIONS
 
-# uBird outputs directory
+# Outputs directory
 readonly UBIRD_OUTPUTS_DEFAULT="${UBIRD_ROOT}/outputs"
 if [[ -z "${UBIRD_OUTPUTS+x}" ]]; then
     UBIRD_OUTPUTS="${UBIRD_OUTPUTS_DEFAULT}"
@@ -64,6 +64,31 @@ if [[ -z "${UBIRD_ATN+x}" ]]; then
 fi
 readonly UBIRD_ATN
 export UBIRD_ATN
+
+# uBird add-on ID
+readonly UBIRD_ADDON_ID_DEFAULT='ubird-direct@celenity.dev'
+if [[ -z "${UBIRD_ADDON_ID+x}" ]]; then
+    UBIRD_ADDON_ID="${UBIRD_ADDON_ID_DEFAULT}"
+fi
+readonly UBIRD_ADDON_ID
+export UBIRD_ADDON_ID
+
+# uBird (ATN) add-on ID
+readonly UBIRD_ATN_ADDON_ID_DEFAULT='uBird@celenity.dev'
+if [[ -z "${UBIRD_ATN_ADDON_ID+x}" ]]; then
+    UBIRD_ATN_ADDON_ID="${UBIRD_ATN_ADDON_ID_DEFAULT}"
+fi
+readonly UBIRD_ATN_ADDON_ID
+export UBIRD_ATN_ADDON_ID
+
+# uBird update URL
+readonly UBIRD_UPDATE_URL_DEFAULT='https:/releases.celenity.dev/addons/updates.json'
+if [[ -z "${UBIRD_UPDATE_URL+x}" ]]; then
+    # By default, use our update URL
+    UBIRD_UPDATE_URL="${UBIRD_UPDATE_URL_DEFAULT}"
+fi
+readonly UBIRD_UPDATE_URL
+export UBIRD_UPDATE_URL
 
 # Should we create a log file for build.sh? (Default)
 readonly UBIRD_LOG_BUILD_DEFAULT=1
@@ -125,35 +150,6 @@ fi
 readonly UBIRD_TAR
 export UBIRD_TAR
 
-# Cipher suites
-## (This enforces strong cipher suites - see ex. https://browserleaks.com/tls)
-readonly UBIRD_CIPHERS_DEFAULT='TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384'
-if [[ -z "${UBIRD_CIPHERS+x}" ]]; then
-    UBIRD_CIPHERS="${UBIRD_CIPHERS_DEFAULT}"
-fi
-readonly UBIRD_CIPHERS
-export UBIRD_CIPHERS
-
-# If curl flags are added, this determines whether they should be appended to our default flags (default),
-## or if they should override them entirely
-readonly UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT=0
-if [[ -z "${UBIRD_CURL_FLAGS_OVERRIDE+x}" ]]; then
-    UBIRD_CURL_FLAGS_OVERRIDE="${UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT}"
-fi
-readonly UBIRD_CURL_FLAGS_OVERRIDE
-export UBIRD_CURL_FLAGS_OVERRIDE
-
-# curl flags
-readonly UBIRD_CURL_FLAGS_DEFAULT="-q --disable --no-netrc -j -e "" -A "" -S --ciphers ${UBIRD_CIPHERS} --clobber --create-dirs --delegation none --disallow-username-in-url --doh-cert-status --ftp-create-dirs --ftp-ssl-control --junk-session-cookies --no-basic --no-ca-native --no-digest --no-doh-insecure --no-http0.9 --no-insecure --no-proxy-insecure --no-negotiate --no-ntlm --no-proxy-basic --no-proxy-ca-native --no-proxy-digest --no-proxy-insecure --no-proxy-ntlm --no-proxy-ssl-allow-beast --no-proxy-ssl-auto-client-cert --no-sessionid --no-skip-existing --no-ssl --no-ssl-allow-beast --no-ssl-auto-client-cert --no-ssl-no-revoke --no-ssl-revoke-best-effort --no-tls-earlydata --no-xattr --progress-meter --proto -all,https --proto-default https --proto-redir -all,https --referer "" --remove-on-error --show-error --ssl-reqd --tlsv1.2 --trace-time --user-agent "" --verbose"
-if [[ -z "${UBIRD_CURL_FLAGS+x}" ]]; then
-    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
-elif [[ "${UBIRD_CURL_FLAGS_OVERRIDE}" == 1 ]]; then
-    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS}"
-else
-    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT} ${UBIRD_CURL_FLAGS}"
-fi
-export UBIRD_CURL_FLAGS
-
 ## uAssets (main)
 readonly UBIRD_UASSETS_MAIN_DEFAULT="${UBIRD_EXTERNAL}/uassets-main"
 if [[ -z "${UBIRD_UASSETS_MAIN+x}" ]]; then
@@ -178,23 +174,35 @@ fi
 readonly UBIRD_UBO
 export UBIRD_UBO
 
-# uBird add-on ID
-readonly UBIRD_ADDON_ID_DEFAULT='uBird@celenity.dev'
-if [[ -z "${UBIRD_ADDON_ID+x}" ]]; then
-    # By default, use "uBird@celenity.dev" for the add-on ID
-    UBIRD_ADDON_ID="${UBIRD_ADDON_ID_DEFAULT}"
+# Cipher suites
+## (This enforces strong cipher suites - see ex. https://browserleaks.com/tls)
+readonly UBIRD_CIPHERS_DEFAULT='TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384'
+if [[ -z "${UBIRD_CIPHERS+x}" ]]; then
+    UBIRD_CIPHERS="${UBIRD_CIPHERS_DEFAULT}"
 fi
-readonly UBIRD_ADDON_ID
-export UBIRD_ADDON_ID
+readonly UBIRD_CIPHERS
+export UBIRD_CIPHERS
 
-# uBird update URL
-readonly UBIRD_UPDATE_URL_DEFAULT='https://gitlab.com/celenityy/uBird/-/raw/main/updates.json'
-if [[ -z "${UBIRD_UPDATE_URL+x}" ]]; then
-    # By default, use our GitLab update URL
-    UBIRD_UPDATE_URL="${UBIRD_UPDATE_URL_DEFAULT}"
+# If curl flags are added, this determines whether they should be appended to our default flags (default),
+## or if they should override them entirely
+readonly UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT=0
+if [[ -z "${UBIRD_CURL_FLAGS_OVERRIDE+x}" ]]; then
+    UBIRD_CURL_FLAGS_OVERRIDE="${UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT}"
 fi
-readonly UBIRD_UPDATE_URL
-export UBIRD_UPDATE_URL
+readonly UBIRD_CURL_FLAGS_OVERRIDE
+export UBIRD_CURL_FLAGS_OVERRIDE
+
+# curl flags
+readonly UBIRD_CURL_FLAGS_DEFAULT="-q --disable --no-netrc -j -e "" -A "" -S --ciphers ${UBIRD_CIPHERS} --clobber --create-dirs --delegation none --disallow-username-in-url --doh-cert-status --ftp-create-dirs --ftp-ssl-control --junk-session-cookies --no-basic --no-ca-native --no-digest --no-doh-insecure --no-http0.9 --no-insecure --no-proxy-insecure --no-negotiate --no-ntlm --no-proxy-basic --no-proxy-ca-native --no-proxy-digest --no-proxy-insecure --no-proxy-ssl-allow-beast --no-proxy-ssl-auto-client-cert --no-sessionid --no-skip-existing --no-ssl --no-ssl-allow-beast --no-ssl-auto-client-cert --no-ssl-no-revoke --no-ssl-revoke-best-effort --no-tls-earlydata --no-xattr --progress-meter --proto -all,https --proto-default https --proto-redir -all,https --referer "" --remove-on-error --show-error --ssl-reqd --tlsv1.2 --trace-time --user-agent "" --verbose"
+if [[ -z "${UBIRD_CURL_FLAGS+x}" ]]; then
+    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
+elif [[ "${UBIRD_CURL_FLAGS_OVERRIDE}" == 1 ]]; then
+    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS}"
+else
+    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT} ${UBIRD_CURL_FLAGS}"
+fi
+export UBIRD_CURL_FLAGS
+
 
 # We've now set our environment variables...
 readonly UBIRD_SET_ENVS=1

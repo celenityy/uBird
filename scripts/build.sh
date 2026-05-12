@@ -8,6 +8,13 @@ if [[ -z "${UBIRD_SET_ENVS+x}" ]]; then
 fi
 source $(dirname $0)/env.sh
 
+# Set up target parameters
+if [[ -z "${1+x}" ]]; then
+    readonly target='all'
+else
+    readonly target=$(echo "${1}" | "${UBIRD_AWK}" '{print tolower($0)}')
+fi
+
 # Build uBird
 readonly UBIRD_FROM_BUILD=1
 export UBIRD_FROM_BUILD
@@ -22,7 +29,7 @@ if [ "${UBIRD_LOG_BUILD}" == 1 ]; then
     # Ensure our log directory exists
     mkdir -vp "${UBIRD_LOG_DIR}"
 
-    bash -x "${UBIRD_SCRIPTS}/build-ubird.sh" > >(tee -a "${BUILD_LOG_FILE}") 2>&1
+    bash -x "${UBIRD_SCRIPTS}/build-ubird.sh" "${target}" > >(tee -a "${BUILD_LOG_FILE}") 2>&1
 else
-    bash -x "${UBIRD_SCRIPTS}/build-ubird.sh"
+    bash -x "${UBIRD_SCRIPTS}/build-ubird.sh" "${target}"
 fi
