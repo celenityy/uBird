@@ -174,7 +174,7 @@ function download() {
     mkdir -vp "$(dirname "${filepath}")"
 
     echo_red_text "Downloading ${url}..."
-    curl ${UBIRD_CURL_FLAGS} -sSL "${url}" -o "${filepath}"
+    curl ${UBIRD_CURL_FLAGS} --location "${url}" --output "${filepath}"
 }
 
 # Extract archives
