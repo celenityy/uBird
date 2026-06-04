@@ -18,11 +18,11 @@ fi
 # Build uBird
 readonly UBIRD_FROM_BUILD=1
 export UBIRD_FROM_BUILD
-if [ "${UBIRD_LOG_BUILD}" == 1 ]; then
+if [[ "${UBIRD_LOG_BUILD}" == 1 ]]; then
     readonly BUILD_LOG_FILE="${UBIRD_LOG_DIR}/build.log"
 
     # If the log file already exists, remove it
-    if [ -f "${BUILD_LOG_FILE}" ]; then
+    if [[ -f "${BUILD_LOG_FILE}" ]]; then
         rm "${BUILD_LOG_FILE}"
     fi
 

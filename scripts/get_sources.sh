@@ -24,11 +24,11 @@ fi
 # Get sources
 readonly UBIRD_FROM_SOURCES=1
 export UBIRD_FROM_SOURCES
-if [ "${UBIRD_LOG_SOURCES}" == 1 ]; then
+if [[ "${UBIRD_LOG_SOURCES}" == 1 ]]; then
     readonly SOURCES_LOG_FILE="${UBIRD_LOG_DIR}/get_sources.log"
 
     # If the log file already exists, remove it
-    if [ -f "${SOURCES_LOG_FILE}" ]; then
+    if [[ -f "${SOURCES_LOG_FILE}" ]]; then
         rm "${SOURCES_LOG_FILE}"
     fi
 

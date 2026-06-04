@@ -20,7 +20,7 @@ readonly ATN_PATCH_FILES=($(yq '.patches[].file' "$(dirname "$0")"/patches-atn.y
 
 function check_patch() {
     local readonly patch="${UBIRD_PATCHES}/$1"
-    if ! [[ -f "${patch}" ]]; then
+    if [[ ! -f "${patch}" ]]; then
         printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "$patch")"
         echo "'$patch' does not exist or is not a file"
         return 1

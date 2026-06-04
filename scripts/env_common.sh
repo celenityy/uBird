@@ -203,7 +203,6 @@ else
 fi
 export UBIRD_CURL_FLAGS
 
-
 # We've now set our environment variables...
 readonly UBIRD_SET_ENVS=1
 export UBIRD_SET_ENVS
