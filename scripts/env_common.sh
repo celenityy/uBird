@@ -175,12 +175,29 @@ readonly UBIRD_UBO
 export UBIRD_UBO
 
 # Cipher suites
-## (This enforces strong cipher suites - see ex. https://browserleaks.com/tls)
-readonly UBIRD_CIPHERS_DEFAULT='TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384'
-if [[ -z "${UBIRD_CIPHERS+x}" ]]; then
-    UBIRD_CIPHERS="${UBIRD_CIPHERS_DEFAULT}"
+## (These enforce strong cipher suites - see ex. https://browserleaks.com/tls)
+
+## For TLS 1.3 connections
+### https://curl.se/docs/manpage.html#--tls13-ciphers
+readonly UBIRD_TLS13_CIPHERS_DEFAULT='TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384'
+if [[ -z "${UBIRD_TLS13_CIPHERS+x}" ]]; then
+  UBIRD_TLS13_CIPHERS="${UBIRD_TLS13_CIPHERS_DEFAULT}"
 fi
-readonly UBIRD_CIPHERS
+readonly UBIRD_TLS13_CIPHERS
+export UBIRD_TLS13_CIPHERS
+
+## For non-TLS 1.3 connections
+### https://curl.se/docs/manpage.html#--ciphers
+readonly UBIRD_NONTLS13_CIPHERS_DEFAULT='ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384'
+if [[ -z "${UBIRD_NONTLS13_CIPHERS+x}" ]]; then
+  UBIRD_NONTLS13_CIPHERS="${UBIRD_NONTLS13_CIPHERS_DEFAULT}"
+fi
+readonly UBIRD_NONTLS13_CIPHERS
+export UBIRD_NONTLS13_CIPHERS
+
+# This includes all ciphers (combining UBIRD_TLS13_CIPHERS + UBIRD_NONTLS13_CIPHERS)
+## Useful because many programs do not require specifying a separate set of ciphers for TLS 1.3 like curl does
+readonly UBIRD_CIPHERS="${UBIRD_TLS13_CIPHERS}:${UBIRD_NONTLS13_CIPHERS}"
 export UBIRD_CIPHERS
 
 # If curl flags are added, this determines whether they should be appended to our default flags (default),
@@ -193,7 +210,7 @@ readonly UBIRD_CURL_FLAGS_OVERRIDE
 export UBIRD_CURL_FLAGS_OVERRIDE
 
 # curl flags
-readonly UBIRD_CURL_FLAGS_DEFAULT="--disable --no-netrc --ciphers ${UBIRD_CIPHERS} --clobber --create-dirs --delegation none --disallow-username-in-url --doh-cert-status --fail --ftp-create-dirs --ftp-ssl-control --junk-session-cookies --no-basic --no-ca-native --no-digest --no-doh-insecure --no-http0.9 --no-insecure --no-proxy-insecure --no-negotiate --no-ntlm --no-proxy-basic --no-proxy-ca-native --no-proxy-digest --no-proxy-insecure --no-proxy-ssl-allow-beast --no-proxy-ssl-auto-client-cert --no-sessionid --no-skip-existing --no-ssl --no-ssl-allow-beast --no-ssl-auto-client-cert --no-ssl-no-revoke --no-ssl-revoke-best-effort --no-tls-earlydata --no-xattr --progress-meter --proto -all,https --proto-default https --proto-redir -all,https --referer "" --remove-on-error --show-error --ssl-reqd --tlsv1.2 --trace-time --user-agent "" --verbose"
+readonly UBIRD_CURL_FLAGS_DEFAULT="--disable --no-netrc --ciphers ${UBIRD_NONTLS13_CIPHERS} --clobber --create-dirs --delegation none --disallow-username-in-url --doh-cert-status --fail --fail-early --junk-session-cookies --no-basic --no-ca-native --no-digest --no-doh-insecure --no-http0.9 --no-insecure --no-negotiate --no-ntlm --no-proxy-basic --no-proxy-ca-native --no-proxy-digest --no-proxy-insecure --no-proxy-negotiate --no-proxy-ssl-auto-client-cert --no-sessionid --no-ssl-auto-client-cert --no-ssl-no-revoke --no-ssl-revoke-best-effort --no-xattr --parallel --post301 --post302 --post303 --progress-meter --proto -all,https --proto-default https --proto-redir -all,https --proxy-ciphers ${UBIRD_NONTLS13_CIPHERS} --proxy-tls13-ciphers ${UBIRD_TLS13_CIPHERS} --referer '' --remove-on-error --retry 5 --retry-all-errors --retry-connrefused --show-error --tls13-ciphers ${UBIRD_TLS13_CIPHERS} --tlsv1.2 --trace-time --user-agent '' --verbose"
 if [[ -z "${UBIRD_CURL_FLAGS+x}" ]]; then
     readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
 elif [[ "${UBIRD_CURL_FLAGS_OVERRIDE}" == 1 ]]; then
