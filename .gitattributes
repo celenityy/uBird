@@ -1,0 +1,18 @@
+* text=auto eol=lf
+
+*.yaml              linguist-detectable
+
+# GitLab
+# (These language names must be lowercase)
+# For a list of supported languages, see:
+# https://github.com/github-linguist/linguist/blob/main/lib/linguist/languages.yml
+.git*               gitlab-language=shell
+.gitlab-ci.yml      gitlab-language=yaml
+
+# Forgejo (Codeberg)/GitHub
+# (These language names must be uppercase)
+# For a list of supported languages, see:
+# Forgejo (Codeberg): https://github.com/go-enry/go-enry/blob/master/data/languageInfo.go
+# GitHub: https://github.com/github-linguist/linguist/blob/main/lib/linguist/languages.yml
+.git*               linguist-language=SHELL
+.gitlab-ci.yml      linguist-language=YAML
