@@ -1,6 +1,11 @@
+*.code-workspace
 .DS_Store
+/.vscode/
+
 /build/
+/outputs/
+
 /env_override.sh
 /external/
-/outputs/
 /scripts/env_local.sh
+/wip/
