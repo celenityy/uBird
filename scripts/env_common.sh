@@ -10,7 +10,7 @@
 ## These need to be set first, to ensure that they don't interfere with certain variables
 readonly UBIRD_ENV_OVERRIDE="${UBIRD_ROOT}/env_override.sh"
 if [[ -f "${UBIRD_ENV_OVERRIDE}" ]]; then
-    source "${UBIRD_ENV_OVERRIDE}"
+  source "${UBIRD_ENV_OVERRIDE}"
 fi
 
 # uBird
@@ -51,7 +51,7 @@ export UBIRD_VERSIONS
 # Outputs directory
 readonly UBIRD_OUTPUTS_DEFAULT="${UBIRD_ROOT}/outputs"
 if [[ -z "${UBIRD_OUTPUTS+x}" ]]; then
-    UBIRD_OUTPUTS="${UBIRD_OUTPUTS_DEFAULT}"
+  UBIRD_OUTPUTS="${UBIRD_OUTPUTS_DEFAULT}"
 fi
 readonly UBIRD_OUTPUTS
 export UBIRD_OUTPUTS
@@ -60,7 +60,7 @@ export UBIRD_OUTPUTS
 ## (The only difference ATM is that ATN builds do not specify an update URL)
 readonly UBIRD_ATN_DEFAULT=0
 if [[ -z "${UBIRD_ATN+x}" ]]; then
-    UBIRD_ATN="${UBIRD_ATN_DEFAULT}"
+  UBIRD_ATN="${UBIRD_ATN_DEFAULT}"
 fi
 readonly UBIRD_ATN
 export UBIRD_ATN
@@ -68,7 +68,7 @@ export UBIRD_ATN
 # uBird add-on ID
 readonly UBIRD_ADDON_ID_DEFAULT='ubird-direct@celenity.dev'
 if [[ -z "${UBIRD_ADDON_ID+x}" ]]; then
-    UBIRD_ADDON_ID="${UBIRD_ADDON_ID_DEFAULT}"
+  UBIRD_ADDON_ID="${UBIRD_ADDON_ID_DEFAULT}"
 fi
 readonly UBIRD_ADDON_ID
 export UBIRD_ADDON_ID
@@ -76,7 +76,7 @@ export UBIRD_ADDON_ID
 # uBird (ATN) add-on ID
 readonly UBIRD_ATN_ADDON_ID_DEFAULT='uBird@celenity.dev'
 if [[ -z "${UBIRD_ATN_ADDON_ID+x}" ]]; then
-    UBIRD_ATN_ADDON_ID="${UBIRD_ATN_ADDON_ID_DEFAULT}"
+  UBIRD_ATN_ADDON_ID="${UBIRD_ATN_ADDON_ID_DEFAULT}"
 fi
 readonly UBIRD_ATN_ADDON_ID
 export UBIRD_ATN_ADDON_ID
@@ -84,8 +84,8 @@ export UBIRD_ATN_ADDON_ID
 # uBird update URL
 readonly UBIRD_UPDATE_URL_DEFAULT='https:/releases.celenity.dev/addons/updates.json'
 if [[ -z "${UBIRD_UPDATE_URL+x}" ]]; then
-    # By default, use our update URL
-    UBIRD_UPDATE_URL="${UBIRD_UPDATE_URL_DEFAULT}"
+  # By default, use our update URL
+  UBIRD_UPDATE_URL="${UBIRD_UPDATE_URL_DEFAULT}"
 fi
 readonly UBIRD_UPDATE_URL
 export UBIRD_UPDATE_URL
@@ -93,7 +93,7 @@ export UBIRD_UPDATE_URL
 # Should we create a log file for build.sh? (Default)
 readonly UBIRD_LOG_BUILD_DEFAULT=1
 if [[ -z "${UBIRD_LOG_BUILD+x}" ]]; then
-    UBIRD_LOG_BUILD="${UBIRD_LOG_BUILD_DEFAULT}"
+  UBIRD_LOG_BUILD="${UBIRD_LOG_BUILD_DEFAULT}"
 fi
 readonly UBIRD_LOG_BUILD
 export UBIRD_LOG_BUILD
@@ -101,7 +101,7 @@ export UBIRD_LOG_BUILD
 # Should we create a log file for get_sources.sh? (Default)
 readonly UBIRD_LOG_SOURCES_DEFAULT=1
 if [[ -z "${UBIRD_LOG_SOURCES+x}" ]]; then
-    UBIRD_LOG_SOURCES="${UBIRD_LOG_SOURCES_DEFAULT}"
+  UBIRD_LOG_SOURCES="${UBIRD_LOG_SOURCES_DEFAULT}"
 fi
 readonly UBIRD_LOG_SOURCES
 export UBIRD_LOG_SOURCES
@@ -109,43 +109,43 @@ export UBIRD_LOG_SOURCES
 # Directory where we should store log files (if logging is desired)
 readonly UBIRD_LOG_DIR_DEFAULT="${UBIRD_BUILD}/logs"
 if [[ -z "${UBIRD_LOG_DIR+x}" ]]; then
-    UBIRD_LOG_DIR="${UBIRD_LOG_DIR_DEFAULT}"
+  UBIRD_LOG_DIR="${UBIRD_LOG_DIR_DEFAULT}"
 fi
 readonly UBIRD_LOG_DIR
 export UBIRD_LOG_DIR
 
 # GNU awk
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
-    readonly UBIRD_AWK_DEFAULT='gawk'
+  readonly UBIRD_AWK_DEFAULT='gawk'
 else
-    readonly UBIRD_AWK_DEFAULT='awk'
+  readonly UBIRD_AWK_DEFAULT='awk'
 fi
 if [[ -z "${UBIRD_AWK+x}" ]]; then
-    UBIRD_AWK="${UBIRD_AWK_DEFAULT}"
+  UBIRD_AWK="${UBIRD_AWK_DEFAULT}"
 fi
 readonly UBIRD_AWK
 export UBIRD_AWK
 
 # GNU sed
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
-    readonly UBIRD_SED_DEFAULT='gsed'
+  readonly UBIRD_SED_DEFAULT='gsed'
 else
-    readonly UBIRD_SED_DEFAULT='sed'
+  readonly UBIRD_SED_DEFAULT='sed'
 fi
 if [[ -z "${UBIRD_SED+x}" ]]; then
-    UBIRD_SED="${UBIRD_SED_DEFAULT}"
+  UBIRD_SED="${UBIRD_SED_DEFAULT}"
 fi
 readonly UBIRD_SED
 export UBIRD_SED
 
 # GNU tar
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
-    readonly UBIRD_TAR_DEFAULT='gtar'
+  readonly UBIRD_TAR_DEFAULT='gtar'
 else
-    readonly UBIRD_TAR_DEFAULT='tar'
+  readonly UBIRD_TAR_DEFAULT='tar'
 fi
 if [[ -z "${UBIRD_TAR+x}" ]]; then
-    UBIRD_TAR="${UBIRD_TAR_DEFAULT}"
+  UBIRD_TAR="${UBIRD_TAR_DEFAULT}"
 fi
 readonly UBIRD_TAR
 export UBIRD_TAR
@@ -153,7 +153,7 @@ export UBIRD_TAR
 ## uAssets (main)
 readonly UBIRD_UASSETS_MAIN_DEFAULT="${UBIRD_EXTERNAL}/uassets-main"
 if [[ -z "${UBIRD_UASSETS_MAIN+x}" ]]; then
-    UBIRD_UASSETS_MAIN="${UBIRD_UASSETS_MAIN_DEFAULT}"
+  UBIRD_UASSETS_MAIN="${UBIRD_UASSETS_MAIN_DEFAULT}"
 fi
 readonly UBIRD_UASSETS_MAIN
 export UBIRD_UASSETS_MAIN
@@ -161,7 +161,7 @@ export UBIRD_UASSETS_MAIN
 ## uAssets (prod)
 readonly UBIRD_UASSETS_PROD_DEFAULT="${UBIRD_EXTERNAL}/uassets-prod"
 if [[ -z "${UBIRD_UASSETS_PROD+x}" ]]; then
-    UBIRD_UASSETS_PROD="${UBIRD_UASSETS_PROD_DEFAULT}"
+  UBIRD_UASSETS_PROD="${UBIRD_UASSETS_PROD_DEFAULT}"
 fi
 readonly UBIRD_UASSETS_PROD
 export UBIRD_UASSETS_PROD
@@ -169,7 +169,7 @@ export UBIRD_UASSETS_PROD
 # uBlock Origin
 readonly UBIRD_UBO_DEFAULT="${UBIRD_EXTERNAL}/ublock"
 if [[ -z "${UBIRD_UBO+x}" ]]; then
-    UBIRD_UBO="${UBIRD_UBO_DEFAULT}"
+  UBIRD_UBO="${UBIRD_UBO_DEFAULT}"
 fi
 readonly UBIRD_UBO
 export UBIRD_UBO
@@ -204,7 +204,7 @@ export UBIRD_CIPHERS
 ## or if they should override them entirely
 readonly UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT=0
 if [[ -z "${UBIRD_CURL_FLAGS_OVERRIDE+x}" ]]; then
-    UBIRD_CURL_FLAGS_OVERRIDE="${UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT}"
+  UBIRD_CURL_FLAGS_OVERRIDE="${UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT}"
 fi
 readonly UBIRD_CURL_FLAGS_OVERRIDE
 export UBIRD_CURL_FLAGS_OVERRIDE
@@ -212,11 +212,11 @@ export UBIRD_CURL_FLAGS_OVERRIDE
 # curl flags
 readonly UBIRD_CURL_FLAGS_DEFAULT="--disable --no-netrc --ciphers ${UBIRD_NONTLS13_CIPHERS} --clobber --create-dirs --delegation none --disallow-username-in-url --doh-cert-status --fail --fail-early --junk-session-cookies --no-basic --no-ca-native --no-digest --no-doh-insecure --no-http0.9 --no-insecure --no-negotiate --no-ntlm --no-proxy-basic --no-proxy-ca-native --no-proxy-digest --no-proxy-insecure --no-proxy-ssl-auto-client-cert --no-sessionid --no-ssl-auto-client-cert --no-ssl-no-revoke --no-ssl-revoke-best-effort --no-xattr --parallel --post301 --post302 --post303 --progress-meter --proto -all,https --proto-default https --proto-redir -all,https --proxy-ciphers ${UBIRD_NONTLS13_CIPHERS} --proxy-tls13-ciphers ${UBIRD_TLS13_CIPHERS} --referer '' --remove-on-error --retry 5 --retry-all-errors --retry-connrefused --show-error --tls13-ciphers ${UBIRD_TLS13_CIPHERS} --tlsv1.2 --trace-time --user-agent '' --verbose"
 if [[ -z "${UBIRD_CURL_FLAGS+x}" ]]; then
-    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
+  readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
 elif [[ "${UBIRD_CURL_FLAGS_OVERRIDE}" == 1 ]]; then
-    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS}"
+  readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS}"
 else
-    readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT} ${UBIRD_CURL_FLAGS}"
+  readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT} ${UBIRD_CURL_FLAGS}"
 fi
 export UBIRD_CURL_FLAGS
 

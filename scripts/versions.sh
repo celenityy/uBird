@@ -1,4 +1,3 @@
-
 # Sources
 
 ## uBlock Origin
@@ -19,4 +18,3 @@ readonly UASSETS_MAIN_SHA512SUM='edc30556fdadad7516c412cff78d2814833470773f446d2
 ### https://github.com/uBlockOrigin/uAssets/tree/gh-pages
 readonly UASSETS_PROD_COMMIT='bbb7c23776203fd9b8c77302a4c7f580a6eebb7a'
 readonly UASSETS_PROD_SHA512SUM='434a7fb5dfe39813243730037ceb046905f2eb6f30fcedaf85fb4886c78366a09559ef0fe682a8ea9d9bbe74b699584a7cdc181a44a14a7d5baf61e92191fe6d'
-
