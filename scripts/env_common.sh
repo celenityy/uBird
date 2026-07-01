@@ -126,6 +126,18 @@ fi
 readonly UBIRD_AWK
 export UBIRD_AWK
 
+# GNU patch
+if [[ "${UBIRD_OS}" == 'osx' ]]; then
+  readonly UBIRD_PATCH_DEFAULT='/opt/homebrew/bin/gpatch'
+else
+  readonly UBIRD_PATCH_DEFAULT='/usr/bin/patch'
+fi
+if [[ -z "${UBIRD_PATCH+x}" ]]; then
+  UBIRD_PATCH="${UBIRD_PATCH_DEFAULT}"
+fi
+readonly UBIRD_PATCH
+export UBIRD_PATCH
+
 # GNU sed
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
   readonly UBIRD_SED_DEFAULT='gsed'

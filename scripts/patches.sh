@@ -12,6 +12,9 @@ readonly RED="\033[0;31m"
 readonly GREEN="\033[0;32m"
 readonly NC="\033[0m"
 
+declare -a PATCH_CMD
+readonly PATCH_CMD=("${UBIRD_PATCH}" -p1 --no-backup-if-mismatch)
+
 declare -a PATCH_FILES
 declare -a ATN_PATCH_FILES
 
@@ -26,7 +29,7 @@ function check_patch() {
     return 1
   fi
 
-  if ! patch -p1 -f --dry-run <"${patch}"; then
+  if ! "${PATCH_CMD[@]}" --dry-run <"${patch}"; then
     printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
     echo "Incompatible patch: '${patch}'"
     return 1
@@ -73,7 +76,7 @@ function apply_patch() {
   local readonly name="$1"
   echo "Applying patch: ${name}"
   check_patch "${name}" || return 1
-  patch -p1 --no-backup-if-mismatch <"${UBIRD_PATCHES}/${name}"
+  "${PATCH_CMD[@]}" <"${UBIRD_PATCHES}/${name}"
   return $?
 }
 
