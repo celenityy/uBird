@@ -63,41 +63,65 @@ readonly UBIRD_GET_SOURCE_CHECKSUM_UPDATE
 # Include version info
 source "${UBIRD_VERSIONS}"
 
-# Function to automate updating SHA512sums of dependencies
-function update_sha512sum() {
-  local readonly old_sha512sum="$1"
-  local readonly new_sha512sum="$2"
+# Function to automate updating checksums of dependencies
+function update_checksum() {
+  local readonly old_checksum="$1"
+  local readonly new_checksum="$2"
   local readonly file="$3"
+  local readonly checksum_type="$4"
 
-  if [[ "${old_sha512sum}" == "${UASSETS_MAIN_SHA512SUM}" ]]; then
-    echo_red_text 'Updating SHA512sum for uAssets (main)...'
-    "${UBIRD_SED}" -i -e "s|UASSETS_MAIN_SHA512SUM='.*'|UASSETS_MAIN_SHA512SUM='"${new_sha512sum}"'|g" "${UBIRD_VERSIONS}"
-    echo_green_text 'SUCCESS: Updated SHA512sum for uAssets (main)'
-  elif [[ "${old_sha512sum}" == "${UASSETS_PROD_SHA512SUM}" ]]; then
-    echo_red_text 'Updating SHA512sum for uAssets (prod)...'
-    "${UBIRD_SED}" -i -e "s|UASSETS_PROD_SHA512SUM='.*'|UASSETS_PROD_SHA512SUM='"${new_sha512sum}"'|g" "${UBIRD_VERSIONS}"
-    echo_green_text 'SUCCESS: Updated SHA512sum for uAssets (prod)'
-  elif [[ "${old_sha512sum}" == "${UBLOCK_SHA512SUM}" ]]; then
-    echo_red_text 'Updating SHA512sum for uBlock Origin...'
-    "${UBIRD_SED}" -i -e "s|UBLOCK_SHA512SUM='.*'|UBLOCK_SHA512SUM='"${new_sha512sum}"'|g" "${UBIRD_VERSIONS}"
-    echo_green_text 'SUCCESS: Updated SHA512sum for uBlock Origin'
+  if [[ "${checksum_type}" == 'md5sum' ]]; then
+    local readonly checksum_type_pretty='MD5sum'
+  elif [[ "${checksum_type}" == 'sha1sum' ]]; then
+    local readonly checksum_type_pretty='SHA1sum'
+  elif [[ "${checksum_type}" == 'sha256sum' ]]; then
+    local readonly checksum_type_pretty='SHA256sum'
+  elif [[ "${checksum_type}" == 'sha512sum' ]]; then
+    local readonly checksum_type_pretty='SHA512sum'
+  else
+    echo_red_text 'ERROR: Unknown checksum type.'
+    exit 1
   fi
 
-  rm "${file}"
+  if [[ "${old_checksum}" == "${new_checksum}" ]]; then
+    echo_red_text 'Checksums match. Skipping...'
+    echo "Old checksum:  ${old_checksum}"
+    echo "New checksum:  ${new_checksum}"
+  else
+    echo_red_text "Updating ${checksum_type_pretty} for ${file}..."
+    "${UBIRD_SED}" -i "s|${old_checksum}|${new_checksum}|" "${UBIRD_VERSIONS}"
+    echo_green_text "SUCCESS: Updated ${checksum_type_pretty} for ${file}"
+  fi
 }
 
-function validate_sha512sum() {
-  local readonly expected_sha512sum="$1"
+function validate_checksum() {
+  local readonly expected_checksum="$1"
   local readonly file="$2"
+  local readonly checksum_type="$3"
 
-  local readonly local_sha512sum=$(sha512sum "${file}" | "${UBIRD_AWK}" '{print $1}')
+  if [[ "${checksum_type}" == 'md5sum' ]]; then
+    local readonly checksum_type_pretty='MD5sum'
+    local readonly local_checksum=$(md5sum "${file}" | "${UBIRD_AWK}" '{print $1}')
+  elif [[ "${checksum_type}" == 'sha1sum' ]]; then
+    local readonly checksum_type_pretty='SHA1sum'
+    local readonly local_checksum=$(sha1sum "${file}" | "${UBIRD_AWK}" '{print $1}')
+  elif [[ "${checksum_type}" == 'sha256sum' ]]; then
+    local readonly checksum_type_pretty='SHA256sum'
+    local readonly local_checksum=$(sha256sum "${file}" | "${UBIRD_AWK}" '{print $1}')
+  elif [[ "${checksum_type}" == 'sha512sum' ]]; then
+    local readonly checksum_type_pretty='SHA512sum'
+    local readonly local_checksum=$(sha512sum "${file}" | "${UBIRD_AWK}" '{print $1}')
+  else
+    echo_red_text 'ERROR: Unknown checksum type.'
+    exit 1
+  fi
 
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
-    update_sha512sum "${expected_sha512sum}" "${local_sha512sum}" "${file}"
-  elif [[ "${local_sha512sum}" != "${expected_sha512sum}" ]]; then
+    update_checksum "${expected_checksum}" "${local_checksum}" "${file}" "${checksum_type}"
+  elif [[ "${local_checksum}" != "${expected_checksum}" ]]; then
     echo_red_text 'ERROR: Checksum validation failed.'
-    echo "Expected SHA512sum:   ${expected_sha512sum}"
-    echo "Actual SHA512sum:     ${local_sha512sum}"
+    echo "Expected ${checksum_type_pretty}:   ${expected_checksum}"
+    echo "Actual ${checksum_type_pretty}:     ${local_checksum}"
 
     # If checksum validation fails, also just remove the file
     rm -f "${file}"
@@ -105,7 +129,7 @@ function validate_sha512sum() {
     exit 1
   else
     echo_green_text 'SUCCESS: Checksum validated.'
-    echo "SHA512sum: ${local_sha512sum}"
+    echo "${checksum_type_pretty}: ${local_checksum}"
   fi
 }
 
@@ -259,7 +283,7 @@ function download_and_extract() {
   fi
 
   # Before extracting, verify SHA512sum...
-  validate_sha512sum "${expected_sha512sum}" "${repo_archive}"
+  validate_checksum "${expected_sha512sum}" "${repo_archive}" 'sha512sum'
 
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]]; then
     echo_red_text "Extracting ${repo_archive}..."
