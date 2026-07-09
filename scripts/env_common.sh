@@ -116,9 +116,9 @@ export UBIRD_LOG_DIR
 
 # GNU awk
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
-  readonly UBIRD_AWK_DEFAULT='gawk'
+  readonly UBIRD_AWK_DEFAULT='/opt/homebrew/bin/gawk'
 else
-  readonly UBIRD_AWK_DEFAULT='awk'
+  readonly UBIRD_AWK_DEFAULT='/bin/awk'
 fi
 if [[ -z "${UBIRD_AWK+x}" ]]; then
   UBIRD_AWK="${UBIRD_AWK_DEFAULT}"
@@ -140,9 +140,9 @@ export UBIRD_PATCH
 
 # GNU sed
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
-  readonly UBIRD_SED_DEFAULT='gsed'
+  readonly UBIRD_SED_DEFAULT='/opt/homebrew/bin/gsed'
 else
-  readonly UBIRD_SED_DEFAULT='sed'
+  readonly UBIRD_SED_DEFAULT='/bin/sed'
 fi
 if [[ -z "${UBIRD_SED+x}" ]]; then
   UBIRD_SED="${UBIRD_SED_DEFAULT}"
@@ -152,9 +152,9 @@ export UBIRD_SED
 
 # GNU tar
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
-  readonly UBIRD_TAR_DEFAULT='gtar'
+  readonly UBIRD_TAR_DEFAULT='/opt/homebrew/bin/gtar'
 else
-  readonly UBIRD_TAR_DEFAULT='tar'
+  readonly UBIRD_TAR_DEFAULT='/bin/tar'
 fi
 if [[ -z "${UBIRD_TAR+x}" ]]; then
   UBIRD_TAR="${UBIRD_TAR_DEFAULT}"
