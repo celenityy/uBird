@@ -63,6 +63,62 @@ readonly UBIRD_GET_SOURCE_CHECKSUM_UPDATE
 # Include version info
 source "${UBIRD_VERSIONS}"
 
+# Back-up (and remove) a file if it exists
+function backup_file() {
+  local readonly file="$1"
+  local readonly file_name="$(basename "${file}")"
+  local readonly backup_file="${UBIRD_EXTERNAL}/temp/backup/${file_name}"
+
+  if [[ -f "${file}" ]]; then
+    rm -f "${backup_file}"
+    mkdir -p "$(dirname "${backup_file}")"
+    cp -f "${file}" "${backup_file}"
+    rm -f "${file}"
+  fi
+}
+
+# Back-up (and remove) a directory if it exists
+function backup_dir() {
+  local readonly dir="$1"
+  local readonly dir_name="$(basename "${dir}")"
+  local readonly backup_dir="${UBIRD_EXTERNAL}/temp/backup/${dir_name}"
+
+  if [[ -d "${dir}" ]]; then
+    rm -rf "${backup_dir}"
+    mkdir -p "$(dirname "${backup_dir}")"
+    cp -rf "${dir}/" "${backup_dir}"
+    rm -rf "${dir}"
+  fi
+}
+
+# Restore a backed-up file
+function restore_file() {
+  local readonly file="$1"
+  local readonly file_name="$(basename "${file}")"
+  local readonly backed_up_file="${UBIRD_EXTERNAL}/temp/backup/${file_name}"
+
+  if [[ -f "${backed_up_file}" ]]; then
+    rm -f "${file}"
+    mkdir -p "$(dirname "${file}")"
+    cp -f "${backed_up_file}" "${file}"
+    rm -f "${backed_up_file}"
+  fi
+}
+
+# Restore a backed-up directory
+function restore_dir() {
+  local readonly dir="$1"
+  local readonly dir_name="$(basename "${dir}")"
+  local readonly backed_up_dir="${UBIRD_EXTERNAL}/temp/backup/${dir_name}"
+
+  if [[ -d "${backed_up_dir}" ]]; then
+    rm -rf "${dir}"
+    mkdir -p "$(dirname "${dir}")"
+    cp -rf "${backed_up_dir}/" "${dir}"
+    rm -rf "${backed_up_dir}"
+  fi
+}
+
 # Function to automate updating checksums of dependencies
 function update_checksum() {
   local readonly old_checksum="$1"
@@ -89,7 +145,7 @@ function update_checksum() {
     echo "New checksum:  ${new_checksum}"
   else
     echo_red_text "Updating ${checksum_type_pretty} for ${file}..."
-    "${UBIRD_SED}" -i "s|${old_checksum}|${new_checksum}|" "${UBIRD_VERSIONS}"
+    "${UBIRD_SED}" -i "s|'${old_checksum}'|'${new_checksum}'|" "${UBIRD_VERSIONS}"
     echo_green_text "SUCCESS: Updated ${checksum_type_pretty} for ${file}"
   fi
 }
@@ -113,7 +169,7 @@ function validate_checksum() {
     local readonly local_checksum=$(sha512sum "${file}" | "${UBIRD_AWK}" '{print $1}')
   else
     echo_red_text 'ERROR: Unknown checksum type.'
-    exit 1
+    return 1
   fi
 
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
@@ -126,7 +182,7 @@ function validate_checksum() {
     # If checksum validation fails, also just remove the file
     rm -f "${file}"
 
-    exit 1
+    return 1
   else
     echo_green_text 'SUCCESS: Checksum validated.'
     echo "${checksum_type_pretty}: ${local_checksum}"
@@ -176,29 +232,115 @@ function clone_repo() {
 
 function download() {
   local readonly url="$1"
-  local readonly filepath="$2"
+  local readonly file_in="$2"
+  local readonly file_name=$(basename "${file_in}")
+  local readonly expected_sha512sum="$3"
 
-  if [[ "${url}" == "" ]]; then
-    echo_red_text "ERROR: URL is required (file: '${filepath}')"
-    exit 1
+  # By default, we want to exit upon an error
+  if [[ -z "${UBIRD_DOWNLOAD_EXIT+x}" ]]; then
+    UBIRD_DOWNLOAD_EXIT=1
   fi
 
-  if [[ -f "${filepath}" ]]; then
-    echo_red_text "${filepath} already exists."
+  # By default, we want to perform post-download actions for sources
+  ## (this includes things like ex. installing a dependency or creating/setting-up an environment)
+  ## This isn't desired in some cases, like if we're updating checksums, or a user just cancels the download
+  unset UBIRD_PERFORM_POST_DOWNLOAD
+  if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
+    ## If we're just updating a checksum, we should never perform post-download actions
+    UBIRD_PERFORM_POST_DOWNLOAD=0
+  else
+    UBIRD_PERFORM_POST_DOWNLOAD=1
+  fi
+
+  if [[ "${url}" == "" ]]; then
+    echo_red_text "ERROR: URL is required (file: '${file_in}')"
+    UBIRD_PERFORM_POST_DOWNLOAD=0
+    if [[ "${UBIRD_DOWNLOAD_EXIT}" != 1 ]]; then
+      unset UBIRD_DOWNLOAD_EXIT
+      return 1
+    else
+      exit 1
+    fi
+  fi
+
+  # If we're doing a checksum update, we download the file to a separate temporary directory, instead of our standard one
+  if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
+    rm -rf "${UBIRD_EXTERNAL}/temp/chksm"
+    local readonly file="${UBIRD_EXTERNAL}/temp/chksm/${file_name}"
+  else
+    local readonly file="${file_in}"
+  fi
+
+  if [[ -f "${file}" ]]; then
+    echo_red_text "${file} already exists."
     read -p "Do you want to re-download? [y/N] " -n 1 -r
     echo
     if [[ "${REPLY}" =~ ^[Yy]$ ]]; then
-      echo_red_text "Removing ${filepath}..."
-      rm -f "${filepath}"
+      # Back-up (in case something goes wrong - ex. checksum validation fails) and remove our file
+      echo_red_text "Removing ${file}..."
+      backup_file "${file}"
+    else
+      unset UBIRD_DOWNLOAD_EXIT
+      UBIRD_PERFORM_POST_DOWNLOAD=0
+      return 0
+    fi
+  fi
+
+  # By default, we know nothing has failed...
+  local UBIRD_CHECKSUM_FAILED=0
+  local UBIRD_DOWNLOAD_FAILED=0
+
+  if [[ ! -d "$(dirname "${file}")" ]]; then
+    mkdir -vp "$(dirname "${file}")"
+    local readonly CREATED_DIR_FOR_DL=1
+  else
+    local readonly CREATED_DIR_FOR_DL=0
+  fi
+
+  echo_red_text "Downloading ${url}..."
+  curl ${UBIRD_CURL_FLAGS} --location "${url}" --output "${file}" || local UBIRD_DOWNLOAD_FAILED=1
+
+  # Verify (or update) SHA512sum
+  validate_checksum "${expected_sha512sum}" "${file}" 'sha512sum' || local UBIRD_CHECKSUM_FAILED=1
+
+  # If we're just updating the checksum, we're done, so go ahead and exit
+  if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
+    if [[ "${UBIRD_DOWNLOAD_FAILED}" == 1 ]]; then
+      echo_red_text 'ERROR: Download failed! Exiting...'
+      exit 1
+    elif [[ "${UBIRD_CHECKSUM_FAILED}" == 1 ]]; then
+      echo_red_text 'ERROR: Failed to update checksum! Exiting...'
+      exit 1
     else
       return 0
     fi
   fi
 
-  mkdir -vp "$(dirname "${filepath}")"
+  # If the download (or checksum validation) failed, restore our back-up
+  if [[ "${UBIRD_CHECKSUM_FAILED}" == 1 ]] || [[ "${UBIRD_DOWNLOAD_FAILED}" == 1 ]]; then
+    if [[ -f "${UBIRD_EXTERNAL}/temp/backup/${file_name}" ]]; then
+      restore_file "${file}"
+    fi
+  fi
 
-  echo_red_text "Downloading ${url}..."
-  curl ${UBIRD_CURL_FLAGS} --location "${url}" --output "${filepath}"
+  # Clean-up
+  rm -f "${UBIRD_EXTERNAL}/temp/backup/${file_name}"
+  rm -rf "${UBIRD_EXTERNAL}/temp/chksm"
+
+  # If the download (or checksum validation) failed, exit
+  if [[ "${UBIRD_CHECKSUM_FAILED}" == 1 ]] || [[ "${UBIRD_DOWNLOAD_FAILED}" == 1 ]]; then
+    # If a directory was created just for this download, remove it
+    if [[ "${CREATED_DIR_FOR_DL}" == 1 ]]; then
+      rm -rf "$(dirname "${file}")"
+    fi
+    if [[ "${UBIRD_DOWNLOAD_EXIT}" != 1 ]]; then
+      unset UBIRD_DOWNLOAD_EXIT
+      return 1
+    else
+      echo_red_text 'ERROR: Download failed! Exiting...'
+      exit 1
+    fi
+  fi
 }
 
 # Extract archives
@@ -241,7 +383,7 @@ function extract() {
   esac
 
   local readonly top_input_dir=$(ls "${UBIRD_EXTERNAL}/temp/${temp_repo_name}")
-  cp -rf "${UBIRD_EXTERNAL}/temp/${temp_repo_name}/${top_input_dir}"/ "${target_path}"
+  cp -rf "${UBIRD_EXTERNAL}/temp/${temp_repo_name}/${top_input_dir}/" "${target_path}"
   rm -rf "${UBIRD_EXTERNAL}/temp/${temp_repo_name}"
 }
 
@@ -251,18 +393,32 @@ function download_and_extract() {
   local readonly path="$3"
   local readonly expected_sha512sum="$4"
 
-  if [[ -d "${path}" ]]; then
+  # By default, we want to perform post-download actions for sources
+  ## (this includes things like ex. installing a dependency or creating/setting-up an environment)
+  ## This isn't desired in some cases, like if we're updating checksums, or a user just cancels the download
+  unset UBIRD_PERFORM_POST_DOWNLOAD
+  if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
+    ## If we're just updating a checksum, we should never perform post-download actions
+    UBIRD_PERFORM_POST_DOWNLOAD=0
+  else
+    UBIRD_PERFORM_POST_DOWNLOAD=1
+  fi
+
+  if [[ -d "${path}" ]] && [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]]; then
     echo_red_text "'${path}' already exists"
     read -p "Do you want to re-download? [y/N] " -n 1 -r
     echo
     if [[ "${REPLY}" =~ ^[Yy]$ ]]; then
+      # Back-up (in case something goes wrong - ex. checksum validation fails) and remove our directory
       echo_red_text "Removing ${path}..."
-      rm -rf "${path}"
+      backup_dir "${path}"
     else
+      UBIRD_PERFORM_POST_DOWNLOAD=0
       return 0
     fi
   fi
 
+  local readonly extension
   if [[ "${url}" =~ \.tar\.xz$ ]]; then
     local readonly extension=".tar.xz"
   elif [[ "${url}" =~ \.tar\.gz$ ]]; then
@@ -273,30 +429,49 @@ function download_and_extract() {
     local readonly extension=".zip"
   fi
 
+  # Tell `download` to return instead of exit upon an error
+  UBIRD_DOWNLOAD_EXIT=0
+
+  # By default, we know the download hasn't failed...
+  local UBIRD_DOWNLOAD_FAILED=0
+
   local readonly repo_archive="${UBIRD_DOWNLOADS}/${repo_name}${extension}"
+  download "${url}" "${repo_archive}" "${expected_sha512sum}" || local UBIRD_DOWNLOAD_FAILED=1
 
-  download "${url}" "${repo_archive}"
-
-  if [[ ! -f "${repo_archive}" ]]; then
-    echo_red_text "ERROR: Source archive for ${repo_name} does not exist."
-    exit 1
+  # If we're just updating the checksum, we're done, so go ahead and exit
+  if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
+    if [[ "${UBIRD_DOWNLOAD_FAILED}" == 1 ]]; then
+      echo_red_text 'ERROR: Download failed! Exiting...'
+      exit 1
+    else
+      return 0
+    fi
   fi
 
-  # Before extracting, verify SHA512sum...
-  validate_checksum "${expected_sha512sum}" "${repo_archive}" 'sha512sum'
-
-  if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]]; then
-    echo_red_text "Extracting ${repo_archive}..."
-    extract "${repo_archive}" "${path}" "${repo_name}"
-    echo
+  # If the download failed, restore our back-up (if possible) and exit
+  if [[ "${UBIRD_DOWNLOAD_FAILED}" == 1 ]]; then
+    restore_dir "${path}"
+    if [[ "${repo_name}" == 'uv' ]]; then
+      UBIRD_PERFORM_POST_DOWNLOAD=0
+      return 1
+    else
+      echo_red_text 'ERROR: Download failed! Exiting...'
+      exit 1
+    fi
   fi
+
+  echo_red_text "Extracting ${repo_archive}..."
+  extract "${repo_archive}" "${path}" "${repo_name}"
+
+  # Clean-up
+  rm -rf "${UBIRD_EXTERNAL}/temp/backup/${repo_name}"
 }
 
 # Get uBlock Origin
 function get_ublock() {
   echo_red_text 'Downloading uBlock Origin...'
   download_and_extract 'ublock' "https://github.com/gorhill/uBlock/archive/${UBLOCK_COMMIT}.tar.gz" "${UBIRD_UBO}" "${UBLOCK_SHA512SUM}"
-  if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]]; then
+  if [[ "${UBIRD_PERFORM_POST_DOWNLOAD}" == 1 ]]; then
     echo_green_text "SUCCESS: Set-up uBlock Origin at ${UBIRD_UBO}"
   fi
 }
@@ -305,7 +480,7 @@ function get_ublock() {
 function get_uassets_main() {
   echo_red_text 'Downloading uAssets (main)...'
   download_and_extract 'uassets-main' "https://github.com/uBlockOrigin/uAssets/archive/${UASSETS_MAIN_COMMIT}.tar.gz" "${UBIRD_UASSETS_MAIN}" "${UASSETS_MAIN_SHA512SUM}"
-  if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]]; then
+  if [[ "${UBIRD_PERFORM_POST_DOWNLOAD}" == 1 ]]; then
     echo_green_text "SUCCESS: Set-up uAssets (main) at ${UBIRD_UASSETS_MAIN}"
   fi
 }
@@ -314,7 +489,7 @@ function get_uassets_main() {
 function get_uassets_prod() {
   echo_red_text 'Downloading uAssets (prod)...'
   download_and_extract 'uassets-prod' "https://github.com/uBlockOrigin/uAssets/archive/${UASSETS_PROD_COMMIT}.tar.gz" "${UBIRD_UASSETS_PROD}" "${UASSETS_PROD_SHA512SUM}"
-  if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]]; then
+  if [[ "${UBIRD_PERFORM_POST_DOWNLOAD}" == 1 ]]; then
     echo_green_text "SUCCESS: Set-up uAssets (prod) at ${UBIRD_UASSETS_PROD}"
   fi
 }
