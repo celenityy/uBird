@@ -13,6 +13,14 @@ if [[ -z "${UBIRD_FROM_BUILD+x}" ]]; then
   exit 1
 fi
 
+# Set-up Python environment
+# The Python environment *should* already be created by `get_sources.sh`, but it may not be (ex. if the user provides their own Python and/or
+# doesn't use `get_sources.sh`), so if it doesn't exist then create it
+if [[ ! -f "${UBIRD_PYENV}" ]]; then
+  "${UBIRD_UV}" venv "${UBIRD_PYENV_DIR}"
+fi
+source "${UBIRD_PYENV}"
+
 readonly target="$1"
 
 # Set-up target parameters
@@ -109,19 +117,19 @@ fi
 echo_green_text "Preparing to build uBird ${UBIRD_VERSION}"
 
 # Create build directories
-mkdir -p "${UBIRD_BUILD}"
+"${UBIRD_MKDIR}" -p "${UBIRD_BUILD}"
 if [[ "${UBIRD_BUILD_ATN}" == 1 ]]; then
-  mkdir -p "${UBIRD_OUTPUTS}/atn"
+  "${UBIRD_MKDIR}" -p "${UBIRD_OUTPUTS}/atn"
 fi
 if [[ "${UBIRD_BUILD_DIRECT}" == 1 ]]; then
-  mkdir -p "${UBIRD_OUTPUTS}/direct"
+  "${UBIRD_MKDIR}" -p "${UBIRD_OUTPUTS}/direct"
 fi
 
 # For checking/applying patch files
 source "${UBIRD_SCRIPTS}/patches.sh"
 
 if [[ ! -f "${UBIRD_BUILD}/temp-manifest.json" ]]; then
-  cp "${UBIRD_UBO}/platform/thunderbird/manifest.json" "${UBIRD_BUILD}/temp-manifest.json"
+  "${UBIRD_CP}" "${UBIRD_UBO}/platform/thunderbird/manifest.json" "${UBIRD_BUILD}/temp-manifest.json"
 fi
 
 function prep_check_patches() {
@@ -152,21 +160,21 @@ function prep_ubird() {
   pushd "${UBIRD_UBO}"
 
   if [[ -f "${UBIRD_UBO}/platform/thunderbird/manifest.json" ]]; then
-    rm "${UBIRD_UBO}/platform/thunderbird/manifest.json"
+    "${UBIRD_RM}" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
   fi
 
-  cp -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
+  "${UBIRD_CP}" -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
 
   if [[ ! -d "${UBIRD_UBO}/dist/build/uAssets" ]]; then
-    mkdir -p "${UBIRD_UBO}/dist/build/uAssets"
+    "${UBIRD_MKDIR}" -p "${UBIRD_UBO}/dist/build/uAssets"
   fi
 
   if [[ ! -d "${UBIRD_UBO}/dist/build/uAssets/main" ]]; then
-    ln -s "${UBIRD_UASSETS_MAIN}" "${UBIRD_UBO}/dist/build/uAssets/main"
+    "${UBIRD_LN}" -s "${UBIRD_UASSETS_MAIN}" "${UBIRD_UBO}/dist/build/uAssets/main"
   fi
 
   if [[ ! -d "${UBIRD_UBO}/dist/build/uAssets/prod" ]]; then
-    ln -s "${UBIRD_UASSETS_PROD}" "${UBIRD_UBO}/dist/build/uAssets/prod"
+    "${UBIRD_LN}" -s "${UBIRD_UASSETS_PROD}" "${UBIRD_UBO}/dist/build/uAssets/prod"
   fi
 
   # Check patches
@@ -175,13 +183,13 @@ function prep_ubird() {
   # Apply patches
   if [[ "${UBIRD_BUILD_ATN}" == 1 ]]; then
     apply_patches_atn
-    cp -f "${UBIRD_UBO}/platform/thunderbird/manifest.json" "${UBIRD_OUTPUTS}/atn/manifest.json"
-    cp -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
+    "${UBIRD_CP}" -f "${UBIRD_UBO}/platform/thunderbird/manifest.json" "${UBIRD_OUTPUTS}/atn/manifest.json"
+    "${UBIRD_CP}" -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
   fi
   if [[ "${UBIRD_BUILD_DIRECT}" == 1 ]]; then
     apply_patches
-    cp -f "${UBIRD_UBO}/platform/thunderbird/manifest.json" "${UBIRD_OUTPUTS}/direct/manifest.json"
-    cp -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
+    "${UBIRD_CP}" -f "${UBIRD_UBO}/platform/thunderbird/manifest.json" "${UBIRD_OUTPUTS}/direct/manifest.json"
+    "${UBIRD_CP}" -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
   fi
 
   if [[ "${UBIRD_BUILD_DIRECT}" == 1 ]]; then
@@ -209,24 +217,24 @@ function build_ubird() {
   echo_red_text "Building uBird ${UBIRD_VERSION}..."
 
   pushd "${UBIRD_UBO}"
-  bash -x "${UBIRD_UBO}/tools/make-thunderbird.sh" all
+  /bin/bash -x "${UBIRD_UBO}/tools/make-thunderbird.sh" all
   popd
 
-  cp -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
+  "${UBIRD_CP}" -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
 
   echo_green_text "SUCCESS: Built uBird ${UBIRD_VERSION}"
 }
 
 function build_ubird_atn() {
-  cp -f "${UBIRD_OUTPUTS}/atn/manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
+  "${UBIRD_CP}" -f "${UBIRD_OUTPUTS}/atn/manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
   build_ubird
-  cp -f "${UBIRD_UBO}/dist/build/uBlock0.thunderbird.xpi" "${UBIRD_OUTPUTS}/ubird-${UBIRD_VERSION}-atn-unsigned.xpi"
+  "${UBIRD_CP}" -f "${UBIRD_UBO}/dist/build/uBlock0.thunderbird.xpi" "${UBIRD_OUTPUTS}/ubird-${UBIRD_VERSION}-atn-unsigned.xpi"
 }
 
 function build_ubird_direct() {
-  cp -f "${UBIRD_OUTPUTS}/direct/manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
+  "${UBIRD_CP}" -f "${UBIRD_OUTPUTS}/direct/manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
   build_ubird
-  cp -f "${UBIRD_UBO}/dist/build/uBlock0.thunderbird.xpi" "${UBIRD_OUTPUTS}/ubird-${UBIRD_VERSION}-unsigned.xpi"
+  "${UBIRD_CP}" -f "${UBIRD_UBO}/dist/build/uBlock0.thunderbird.xpi" "${UBIRD_OUTPUTS}/ubird-${UBIRD_VERSION}-unsigned.xpi"
 }
 
 set_version

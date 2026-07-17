@@ -24,3 +24,12 @@ else
   readonly UBIRD_OS='unknown'
 fi
 export UBIRD_OS
+
+# Set architecture
+readonly PLATFORM_ARCH=$(uname -m)
+if [[ "${PLATFORM_ARCH}" == 'arm64' ]]; then
+  readonly UBIRD_PLATFORM_ARCH='arm64'
+else
+  readonly UBIRD_PLATFORM_ARCH='x86_64'
+fi
+export UBIRD_PLATFORM_ARCH

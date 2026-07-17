@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Set-up our environment
 if [[ -z "${UBIRD_SET_ENVS+x}" ]]; then
-  bash -x $(dirname $0)/env.sh
+  /bin/bash -x $(dirname $0)/env.sh
 fi
 source $(dirname $0)/env.sh
 
@@ -23,13 +23,13 @@ if [[ "${UBIRD_LOG_BUILD}" == 1 ]]; then
 
   # If the log file already exists, remove it
   if [[ -f "${BUILD_LOG_FILE}" ]]; then
-    rm "${BUILD_LOG_FILE}"
+    "${UBIRD_RM}" "${BUILD_LOG_FILE}"
   fi
 
   # Ensure our log directory exists
-  mkdir -vp "${UBIRD_LOG_DIR}"
+  "${UBIRD_MKDIR}" -vp "${UBIRD_LOG_DIR}"
 
-  bash -x "${UBIRD_SCRIPTS}/build-ubird.sh" "${target}" > >(tee -a "${BUILD_LOG_FILE}") 2>&1
+  /bin/bash -x "${UBIRD_SCRIPTS}/build-ubird.sh" "${target}" > >("${UBIRD_TEE}" -a "${BUILD_LOG_FILE}") 2>&1
 else
-  bash -x "${UBIRD_SCRIPTS}/build-ubird.sh" "${target}"
+  /bin/bash -x "${UBIRD_SCRIPTS}/build-ubird.sh" "${target}"
 fi

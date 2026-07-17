@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Set-up our environment
 if [[ -z "${UBIRD_SET_ENVS+x}" ]]; then
-  bash -x $(dirname $0)/env.sh
+  /bin/bash -x $(dirname $0)/env.sh
 fi
 source $(dirname $0)/env.sh
 
@@ -18,19 +18,19 @@ readonly PATCH_CMD=("${UBIRD_PATCH}" -p1 --no-backup-if-mismatch)
 declare -a PATCH_FILES
 declare -a ATN_PATCH_FILES
 
-readonly PATCH_FILES=($(yq '.patches[].file' "$(dirname "$0")"/patches.yaml))
-readonly ATN_PATCH_FILES=($(yq '.patches[].file' "$(dirname "$0")"/patches-atn.yaml))
+readonly PATCH_FILES=($("${UBIRD_YQ}" '.patches[].file' "$("${UBIRD_DIRNAME}" "$0")"/patches.yaml))
+readonly ATN_PATCH_FILES=($("${UBIRD_YQ}" '.patches[].file' "$("${UBIRD_DIRNAME}" "$0")"/patches-atn.yaml))
 
 function check_patch() {
   local readonly patch="${UBIRD_PATCHES}/$1"
   if [[ ! -f "${patch}" ]]; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "$patch")"
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "$patch")"
     echo "'$patch' does not exist or is not a file"
     return 1
   fi
 
   if ! "${PATCH_CMD[@]}" --dry-run <"${patch}"; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Incompatible patch: '${patch}'"
     return 1
   fi
@@ -55,9 +55,9 @@ function check_patches_atn() {
 function test_patches() {
   for patch in "${PATCH_FILES[@]}"; do
     if ! check_patch "${patch}" >/dev/null 2>&1; then
-      printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+      printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     else
-      printf "${GREEN}✓ %-45s: OK${NC}\n" "$(basename "${patch}")"
+      printf "${GREEN}✓ %-45s: OK${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     fi
   done
 }
@@ -65,9 +65,9 @@ function test_patches() {
 function test_patches_atn() {
   for patch in "${ATN_PATCH_FILES[@]}"; do
     if ! check_patch "${patch}" >/dev/null 2>&1; then
-      printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+      printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     else
-      printf "${GREEN}✓ %-45s: OK${NC}\n" "$(basename "${patch}")"
+      printf "${GREEN}✓ %-45s: OK${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     fi
   done
 }
@@ -83,7 +83,7 @@ function apply_patch() {
 function apply_patches() {
   for patch in "${PATCH_FILES[@]}"; do
     if ! apply_patch "${patch}"; then
-      printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+      printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
       echo "Failed to apply ${patch}"
       return 1
     fi
@@ -93,7 +93,7 @@ function apply_patches() {
 function apply_patches_atn() {
   for patch in "${ATN_PATCH_FILES[@]}"; do
     if ! apply_patch "${patch}"; then
-      printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+      printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
       echo "Failed to apply ${patch}"
       return 1
     fi
@@ -115,7 +115,7 @@ function list_patches_atn() {
 function slugify() {
   local readonly input="$1"
   echo "${input}" |                  \
-    tr '[:upper:]' '[:lower:]' | \
+    "${UBIRD_TR}" '[:upper:]' '[:lower:]' | \
     "${UBIRD_SED}" -E 's/[^a-z0-9]+/-/g' |  \
     "${UBIRD_SED}" -E 's/^-+|-+$//g'
 }
@@ -129,24 +129,24 @@ function rebase_patch() {
 
   # Validate inputs
   if [[ -z "${compatible_tag}" || -z "${target_tag}" || -z "${patch_file}" ]]; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Missing required parameters" >&2
     echo "Usage: rebase_patch <compatible_tag> <target_tag> <patch_file_path>" >&2
     return 1
   fi
 
   if [[ ! -f "${patch_file}" ]]; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Patch file '${patch_file}' does not exist" >&2
     return 1
   fi
 
   # Store original state for rollback
-  local readonly original_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  local readonly original_branch=$("${UBIRD_GIT}" rev-parse --abbrev-ref HEAD 2>/dev/null)
 
-  local readonly original_stash_count=$(git stash list | wc -l)
+  local readonly original_stash_count=$("${UBIRD_GIT}" stash list | "${UBIRD_WC}" -l)
 
-  local readonly patch_name=$(basename "${patch_file}" .patch)
+  local readonly patch_name=$("${UBIRD_BASENAME}" "${patch_file}" .patch)
 
   local readonly branch_name="rebase-${patch_name}"
 
@@ -154,50 +154,50 @@ function rebase_patch() {
     echo "Error occurred, rolling back changes..." >&2
 
     # Check if we're in the middle of a rebase and abort it
-    if git status --porcelain=v1 2>/dev/null | grep -q "^R" ||
-     [[ -d "$(git rev-parse --git-dir)/rebase-merge" ]] ||
-     [[ -d "$(git rev-parse --git-dir)/rebase-apply" ]]; then
+    if "${UBIRD_GIT}" status --porcelain=v1 2>/dev/null | "${UBIRD_GREP}" -q "^R" ||
+     [[ -d "$("${UBIRD_GIT}" rev-parse --git-dir)/rebase-merge" ]] ||
+     [[ -d "$("${UBIRD_GIT}" rev-parse --git-dir)/rebase-apply" ]]; then
       echo "Aborting rebase in progress..."
-      git rebase --abort 2>/dev/null
+      "${UBIRD_GIT}" rebase --abort 2>/dev/null
     fi
 
     # Switch back to original branch if it exists
     if [[ -n "${original_branch}" && "${original_branch}" != "HEAD" ]]; then
-      git checkout "${original_branch}" 2>/dev/null
+      "${UBIRD_GIT}" checkout "${original_branch}" 2>/dev/null
     fi
 
     # Delete the temporary branch if it was created
-    git branch -D "${branch_name}" 2>/dev/null
+    "${UBIRD_GIT}" branch -D "${branch_name}" 2>/dev/null
 
     # Restore stashed changes if any were created
-    local readonly current_stash_count=$(git stash list | wc -l)
+    local readonly current_stash_count=$("${UBIRD_GIT}" stash list | "${UBIRD_WC}" -l)
     if [[ "${current_stash_count}" -gt "${original_stash_count}" ]]; then
-      git stash pop 2>/dev/null
+      "${UBIRD_GIT}" stash pop 2>/dev/null
     fi
 
     return 1
   }
 
   # Ensure clean git directory state
-  if ! git diff-index --quiet HEAD --; then
+  if ! "${UBIRD_GIT}" diff-index --quiet HEAD --; then
     echo "Stashing uncommitted changes..."
-    if ! git stash push -m "Temporary stash for patch rebase"; then
-      printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+    if ! "${UBIRD_GIT}" stash push -m "Temporary stash for patch rebase"; then
+      printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
       echo "Failed to stash changes" >&2
       return 1
     fi
   fi
 
   # Check if tags exist
-  if ! git rev-parse --verify "${compatible_tag}" >/dev/null 2>&1; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+  if ! "${UBIRD_GIT}" rev-parse --verify "${compatible_tag}" >/dev/null 2>&1; then
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Compatible tag '${compatible_tag}' does not exist" >&2
     cleanup_and_rollback
     return 1
   fi
 
-  if ! git rev-parse --verify "${target_tag}" >/dev/null 2>&1; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+  if ! "${UBIRD_GIT}" rev-parse --verify "${target_tag}" >/dev/null 2>&1; then
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Target tag '${target_tag}' does not exist" >&2
     cleanup_and_rollback
     return 1
@@ -205,8 +205,8 @@ function rebase_patch() {
 
   # Checkout the compatible tag
   echo "Checking out compatible tag '${compatible_tag}'..."
-  if ! git checkout "${compatible_tag}"; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+  if ! "${UBIRD_GIT}" checkout "${compatible_tag}"; then
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Failed to checkout compatible tag '${compatible_tag}'" >&2
     cleanup_and_rollback
     return 1
@@ -214,8 +214,8 @@ function rebase_patch() {
 
   # Create and switch to new branch
   echo "Creating branch '${branch_name}'..."
-  if ! git checkout -b "${branch_name}"; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+  if ! "${UBIRD_GIT}" checkout -b "${branch_name}"; then
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Failed to create branch '${branch_name}'" >&2
     cleanup_and_rollback
     return 1
@@ -223,26 +223,26 @@ function rebase_patch() {
 
   # Apply the patch
   echo "Applying patch '${patch_file}'..."
-  if ! git apply "${patch_file}"; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+  if ! "${UBIRD_GIT}" apply "${patch_file}"; then
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Failed to apply '${patch_file}'" >&2
     cleanup_and_rollback
     return 1
   fi
 
   # Stage all changes
-  if ! git add .; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+  if ! "${UBIRD_GIT}" add .; then
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Failed to stage changes" >&2
     cleanup_and_rollback
     return 1
   fi
 
   # Commit the changes
-  local readonly commit_message="Apply patch $(basename "${patch_file}") - rebased to ${target_tag}"
+  local readonly commit_message="Apply patch $("${UBIRD_BASENAME}" "${patch_file}") - rebased to ${target_tag}"
   echo "Committing changes..."
-  if ! git commit -m "${commit_message}"; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+  if ! "${UBIRD_GIT}" commit -m "${commit_message}"; then
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Failed to commit changes" >&2
     cleanup_and_rollback
     return 1
@@ -250,8 +250,8 @@ function rebase_patch() {
 
   # Rebase to target tag
   echo "Rebasing to target tag '${target_tag}'..."
-  if ! git rebase "${target_tag}"; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+  if ! "${UBIRD_GIT}" rebase "${target_tag}"; then
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Failed to rebase to target tag '${target_tag}'" >&2
     cleanup_and_rollback
     return 1
@@ -259,41 +259,41 @@ function rebase_patch() {
 
   # Update the patch file using git format-patch
   echo "Updating patch file..."
-  local readonly temp_patch=$(mktemp)
-  if ! git format-patch -1 --stdout >"${temp_patch}"; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+  local readonly temp_patch=$("${UBIRD_MKTEMP}")
+  if ! "${UBIRD_GIT}" format-patch -1 --stdout >"${temp_patch}"; then
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Failed to generate new patch" >&2
-    rm -f "${temp_patch}"
+    "${UBIRD_RM}" -f "${temp_patch}"
     cleanup_and_rollback
     return 1
   fi
 
   # Atomically replace the original patch file
-  if ! mv "${temp_patch}" "${patch_file}"; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+  if ! "${UBIRD_MV}" "${temp_patch}" "${patch_file}"; then
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Failed to update patch file" >&2
-    rm -f "${temp_patch}"
+    "${UBIRD_RM}" -f "${temp_patch}"
     cleanup_and_rollback
     return 1
   fi
 
   # Cleanup: switch back to original branch and delete temporary branch
   if [[ -n "${original_branch}" && "${original_branch}" != "HEAD" ]]; then
-    git checkout "${original_branch}"
+    "${UBIRD_GIT}" checkout "${original_branch}"
   else
-    git checkout "${target_tag}"
+    "${UBIRD_GIT}" checkout "${target_tag}"
   fi
 
-  git branch -D "${branch_name}"
+  "${UBIRD_GIT}" branch -D "${branch_name}"
 
   # Restore stashed changes if any
-  local readonly current_stash_count=$(git stash list | wc -l)
+  local readonly current_stash_count=$("${UBIRD_GIT}" stash list | "${UBIRD_WC}" -l)
   if [[ "${current_stash_count}" -gt "${original_stash_count}" ]]; then
     echo "Restoring stashed changes..."
-    git stash pop
+    "${UBIRD_GIT}" stash pop
   fi
 
-  printf "${GREEN}✓ %-45s: SUCCESS${NC}\n" "$(basename "${patch}")"
+  printf "${GREEN}✓ %-45s: SUCCESS${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
   echo "Rebased patch '${patch_file}' from '${compatible_tag}' to '${target_tag}'"
   return 0
 }
@@ -306,7 +306,7 @@ function rebase_patches() {
 
   # Validate inputs
   if [[ -z "${compatible_tag}" || -z "${target_tag}" ]]; then
-    printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+    printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Missing required parameters" >&2
     echo "Usage: rebase_patches <compatible_tag> <target_tag>" >&2
     return 1
@@ -325,10 +325,10 @@ function rebase_patches() {
     echo "Processing: ${patch_file}"
 
     if rebase_patch "${compatible_tag}" "${target_tag}" "${patch_file}"; then
-      printf "${GREEN}✓ %-45s: SUCCESS${NC}\n" "$(basename "${patch}")"
+      printf "${GREEN}✓ %-45s: SUCCESS${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
       ((success_count++))
     else
-      printf "${RED}✗ %-45s: FAILED${NC}\n" "$(basename "${patch}")"
+      printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
       failed_patches+=("${patch_file}")
       ((failure_count++))
     fi

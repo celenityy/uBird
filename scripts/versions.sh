@@ -1,20 +1,37 @@
-# Sources
-
-## uBlock Origin
-### Version: 1.72.2
-### https://github.com/gorhill/uBlock
+# uBlock Origin
+# Version: 1.72.2
+# https://github.com/gorhill/uBlock
 readonly UBLOCK_COMMIT='3d370ea1603988bf678d7c5f621f161925fc36d9'
 readonly UBLOCK_SHA512SUM='df2e0ff5abadeee5d0ba0d72dead15cc28cd2f2340813d2d444a5e714fb5419cf7fec8ad2548c8522ab985807f20e223c024ad602a71353ddddfab7ecd93268d'
 readonly UBLOCK_VERSION='1.72.2'
 
 readonly UBIRD_VERSION="${UBLOCK_VERSION}"
 
-## uAssets (main)
-### https://github.com/uBlockOrigin/uAssets/tree/master
+# uAssets (main)
+# https://github.com/uBlockOrigin/uAssets/tree/master
 readonly UASSETS_MAIN_COMMIT='4d21a3805dc4a749a6ce4990132d25bc435da07c'
 readonly UASSETS_MAIN_SHA512SUM='35fae389e222eeee3bee0f8b4543c3075b16d9e64aafe1817898c608a008a88d06b42b88982d76966b39be8414d6829c6d099324ffcf80731c68eea249ff8afb'
 
-## uAssets (prod)
-### https://github.com/uBlockOrigin/uAssets/tree/gh-pages
+# uAssets (prod)
+# https://github.com/uBlockOrigin/uAssets/tree/gh-pages
 readonly UASSETS_PROD_COMMIT='f82bcd975bcb7a4784e973c26e275c8c0a176b2c'
 readonly UASSETS_PROD_SHA512SUM='357c7412bb6a93d20d851d48ec5d49906064f49b96f16b80866addf98e27cbc24f350853df2b920c586322f6782d9128c6e4d764748c2e2fe80d4b9cfb63128d'
+
+# Python
+# Version: 20260623 (3.14.6)
+# https://github.com/astral-sh/python-build-standalone
+readonly PYTHON_GIT_RELEASE='20260623'
+readonly PYTHON_SHA512SUM_LINUX_ARM64='fe2d0afd35432aa958e3e9d40cab0b2a925d56608e177ed1b63f9908661ca9cfafea03ea706bfe0f2aa263587e2eb7c4523007abfc12c0ebd07ebbbb1a583d57'
+readonly PYTHON_SHA512SUM_LINUX_X86_64='cefb35c7913dbfda8375a80a7aab061ce4e5f1d3d3b9a816bd95b620121d191063330b1fa088aba93e9e76e11dad16e1cb0f104f73a4eca9bde5b10a58d8f2c1'
+readonly PYTHON_SHA512SUM_OSX_ARM64='3cf770f325e5eadddbea6909fc647fecb2ff3fe424a04d20e6f59b7b65cbe2b041ec73014593d31a19e836775e8c220ca37ac5551b20156cbb37dc6db84d93d9'
+readonly PYTHON_SHA512SUM_OSX_X86_64='c5e2c8663225dce3ba52e861d73db201e7f42cb7cecba9a414299d4186e70a5a91ee89c9619e4ac276f428a8e70a0ea75ab0280fa588e21e26ea1189795d9352'
+readonly PYTHON_VERSION='3.14.6'
+
+# uv
+# Version: 0.11.28
+# https://github.com/astral-sh/uv
+readonly UV_SHA512SUM_LINUX_ARM64='4661823b5b1e91f92081dd79d8383a144811ec28fa53d2cd67294b084de48244722da8c14b1b81b4d6cb9756bcfd1b52de61e8912f04d0f16c5b74bedc894b27'
+readonly UV_SHA512SUM_LINUX_X86_64='3713c86b16ffe2d0dff67b86fd2e703a50cd9a335ebf91fcb1f2871be5a32bda355a3b15384b10b7d3e174ef07a7e46781213e1e8dfdfde45ebabaf437252ad1'
+readonly UV_SHA512SUM_OSX_ARM64='cb172bba49f3fac97f665b145bd37deaaa1746ccf7087b82176f8f04370bcdb3eea566ba393c9664c5a9ef610cd6606c5f9158e8505490270607b6f3adab0a78'
+readonly UV_SHA512SUM_OSX_X86_64='b5311b5a9e6d0a62653f8ba56761b8f7748b0791c5f237e8d9838f89496626db84fffa2aebf35be26b7c952874548b6a304ad44e1245256a59dda85fc7e06d42'
+readonly UV_VERSION='0.11.28'
