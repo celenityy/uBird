@@ -45,6 +45,7 @@ if [[ -z "${UBIRD_SET_ENVS+x}" ]]; then
   "${UBIRD_LN}" -sf "${UBIRD_PATCH}"      "${UBIRD_PATH}/patch"
   "${UBIRD_LN}" -sf "${UBIRD_PYTHON}"     "${UBIRD_PATH}/python"
   "${UBIRD_LN}" -sf "${UBIRD_PYTHON}"     "${UBIRD_PATH}/python3"
+  "${UBIRD_LN}" -sf "${UBIRD_PYTHON}"     "${UBIRD_PATH}/python3.14"
   "${UBIRD_LN}" -sf "${UBIRD_RM}"         "${UBIRD_PATH}/rm"
   "${UBIRD_LN}" -sf "${UBIRD_SED}"        "${UBIRD_PATH}/gsed"
   "${UBIRD_LN}" -sf "${UBIRD_SED}"        "${UBIRD_PATH}/sed"

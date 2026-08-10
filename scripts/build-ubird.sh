@@ -80,8 +80,8 @@ if [[ -z "${UBIRD_VERSION}" ]]; then
   exit 1
 fi
 
-if [[ -z "${UBLOCK_VERSION}" ]]; then
-  echo_red_text 'ERROR: The UBLOCK_VERSION environment variable is missing! Aborting...'
+if [[ -z "${UBIRD_UBLOCK_VERSION}" ]]; then
+  echo_red_text 'ERROR: The UBIRD_UBLOCK_VERSION environment variable is missing! Aborting...'
   exit 1
 fi
 
@@ -157,7 +157,7 @@ function prep_check_patches() {
 function set_version() {
   # Set uBird version
   pushd "${UBIRD_UBO}"
-  "${UBIRD_SED}" -i "s|${UBLOCK_VERSION}|${UBIRD_VERSION}|" "${UBIRD_UBO}/dist/version"
+  "${UBIRD_SED}" -i "s|${UBIRD_UBLOCK_VERSION}|${UBIRD_VERSION}|" "${UBIRD_UBO}/dist/version"
   popd
 }
 

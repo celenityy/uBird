@@ -527,43 +527,43 @@ function get_python() {
 
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
     echo_red_text 'Downloading Python (Linux - ARM64)...'
-    download "https://github.com/astral-sh/python-build-standalone/releases/download/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_DIR}/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz" "${PYTHON_SHA512SUM_LINUX_ARM64}"
+    download "https://github.com/astral-sh/python-build-standalone/releases/download/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_DIR}/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_LINUX_ARM64}"
 
     echo_red_text 'Downloading Python (Linux - x86_64)...'
-    download "https://github.com/astral-sh/python-build-standalone/releases/download/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_DIR}/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz" "${PYTHON_SHA512SUM_LINUX_X86_64}"
+    download "https://github.com/astral-sh/python-build-standalone/releases/download/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_DIR}/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_LINUX_X86_64}"
 
     echo_red_text 'Downloading Python (OS X - ARM64)...'
-    download "https://github.com/astral-sh/python-build-standalone/releases/download/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-aarch64-apple-darwin-install_only_stripped.tar.gz" "${UBIRD_PYTHON_DIR}/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-aarch64-apple-darwin-install_only_stripped.tar.gz" "${PYTHON_SHA512SUM_OSX_ARM64}"
+    download "https://github.com/astral-sh/python-build-standalone/releases/download/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-aarch64-apple-darwin-install_only_stripped.tar.gz" "${UBIRD_PYTHON_DIR}/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-aarch64-apple-darwin-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_OSX_ARM64}"
 
     echo_red_text 'Downloading Python (OS X - x86_64)...'
-    download "https://github.com/astral-sh/python-build-standalone/releases/download/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-x86_64-apple-darwin-install_only_stripped.tar.gz" "${UBIRD_PYTHON_DIR}/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-x86_64-apple-darwin-install_only_stripped.tar.gz" "${PYTHON_SHA512SUM_OSX_X86_64}"
+    download "https://github.com/astral-sh/python-build-standalone/releases/download/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-x86_64-apple-darwin-install_only_stripped.tar.gz" "${UBIRD_PYTHON_DIR}/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-x86_64-apple-darwin-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_OSX_X86_64}"
   else
     # Set our platform
     if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
-      local readonly PYTHON_PLATFORM='apple-darwin'
+      local readonly UBIRD_PYTHON_PLATFORM='apple-darwin'
     else
-      local readonly PYTHON_PLATFORM='unknown-linux-gnu'
+      local readonly UBIRD_PYTHON_PLATFORM='unknown-linux-gnu'
     fi
 
     # Set our platform architecture
     if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
-      local readonly PYTHON_ARCH='aarch64'
+      local readonly UBIRD_PYTHON_ARCH='aarch64'
     else
-      local readonly PYTHON_ARCH='x86_64'
+      local readonly UBIRD_PYTHON_ARCH='x86_64'
     fi
 
     # Set our checksum to verify
     if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
       if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
-        local readonly PYTHON_SHA512SUM="${PYTHON_SHA512SUM_OSX_ARM64}"
+        local readonly UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_OSX_ARM64}"
       else
-        local readonly PYTHON_SHA512SUM="${PYTHON_SHA512SUM_LINUX_ARM64}"
+        local readonly UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_LINUX_ARM64}"
       fi
     else
       if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
-        local readonly PYTHON_SHA512SUM="${PYTHON_SHA512SUM_OSX_X86_64}"
+        local readonly UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_OSX_X86_64}"
       else
-        local readonly PYTHON_SHA512SUM="${PYTHON_SHA512SUM_LINUX_X86_64}"
+        local readonly UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_LINUX_X86_64}"
       fi
     fi
 
@@ -576,7 +576,7 @@ function get_python() {
     local UBIRD_PYTHON_INSTALL_FAILED=0
 
     echo_red_text 'Downloading Python...'
-    download "https://github.com/astral-sh/python-build-standalone/releases/download/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-${PYTHON_ARCH}-${PYTHON_PLATFORM}-install_only_stripped.tar.gz" "${UBIRD_PYTHON_DIR}/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-${PYTHON_ARCH}-${PYTHON_PLATFORM}-install_only_stripped.tar.gz" "${PYTHON_SHA512SUM}" || local UBIRD_DOWNLOAD_FAILED=1
+    download "https://github.com/astral-sh/python-build-standalone/releases/download/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-${UBIRD_PYTHON_ARCH}-${UBIRD_PYTHON_PLATFORM}-install_only_stripped.tar.gz" "${UBIRD_PYTHON_DIR}/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-${UBIRD_PYTHON_ARCH}-${UBIRD_PYTHON_PLATFORM}-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM}" || local UBIRD_DOWNLOAD_FAILED=1
 
     # If the download failed, restore our back-ups, clean-up, and exit
     if [[ "${UBIRD_DOWNLOAD_FAILED}" == 1 ]]; then
@@ -588,10 +588,10 @@ function get_python() {
       "${UBIRD_RM}" -rf "${UBIRD_EXTERNAL}/temp"
       exit 1
     elif [[ "${UBIRD_PERFORM_POST_DOWNLOAD}" == 1 ]]; then
-      echo_green_text "SUCCESS: Downloaded Python to ${UBIRD_PYTHON_DIR}/${PYTHON_GIT_RELEASE}/cpython-${PYTHON_VERSION}+${PYTHON_GIT_RELEASE}-${PYTHON_ARCH}-${PYTHON_PLATFORM}-install_only_stripped.tar.gz"
+      echo_green_text "SUCCESS: Downloaded Python to ${UBIRD_PYTHON_DIR}/${UBIRD_PYTHON_GIT_RELEASE}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-${UBIRD_PYTHON_ARCH}-${UBIRD_PYTHON_PLATFORM}-install_only_stripped.tar.gz"
 
       echo_red_text 'Installing Python...'
-      "${UBIRD_UV}" python install "${PYTHON_VERSION}" || local UBIRD_PYTHON_INSTALL_FAILED=1
+      "${UBIRD_UV}" python install "${UBIRD_PYTHON_VERSION}" || local UBIRD_PYTHON_INSTALL_FAILED=1
 
       # If the install failed, restore our back-ups, clean-up, and exit
       if [[ "${UBIRD_PYTHON_INSTALL_FAILED}" == 1 ]]; then
@@ -623,7 +623,7 @@ function get_python() {
 # Get uBlock Origin
 function get_ublock() {
   echo_red_text 'Downloading uBlock Origin...'
-  download_and_extract 'ublock' "https://github.com/gorhill/uBlock/archive/${UBLOCK_COMMIT}.tar.gz" "${UBIRD_UBO}" "${UBLOCK_SHA512SUM}"
+  download_and_extract 'ublock' "https://github.com/gorhill/uBlock/archive/${UBIRD_UBLOCK_COMMIT}.tar.gz" "${UBIRD_UBO}" "${UBIRD_UBLOCK_SHA512SUM}"
   if [[ "${UBIRD_PERFORM_POST_DOWNLOAD}" == 1 ]]; then
     echo_green_text "SUCCESS: Set-up uBlock Origin at ${UBIRD_UBO}"
   fi
@@ -632,7 +632,7 @@ function get_ublock() {
 # Get uAssets (main)
 function get_uassets_main() {
   echo_red_text 'Downloading uAssets (main)...'
-  download_and_extract 'uassets-main' "https://github.com/uBlockOrigin/uAssets/archive/${UASSETS_MAIN_COMMIT}.tar.gz" "${UBIRD_UASSETS_MAIN}" "${UASSETS_MAIN_SHA512SUM}"
+  download_and_extract 'uassets-main' "https://github.com/uBlockOrigin/uAssets/archive/${UBIRD_UASSETS_MAIN_COMMIT}.tar.gz" "${UBIRD_UASSETS_MAIN}" "${UBIRD_UASSETS_MAIN_SHA512SUM}"
   if [[ "${UBIRD_PERFORM_POST_DOWNLOAD}" == 1 ]]; then
     echo_green_text "SUCCESS: Set-up uAssets (main) at ${UBIRD_UASSETS_MAIN}"
   fi
@@ -641,7 +641,7 @@ function get_uassets_main() {
 # Get uAssets (prod)
 function get_uassets_prod() {
   echo_red_text 'Downloading uAssets (prod)...'
-  download_and_extract 'uassets-prod' "https://github.com/uBlockOrigin/uAssets/archive/${UASSETS_PROD_COMMIT}.tar.gz" "${UBIRD_UASSETS_PROD}" "${UASSETS_PROD_SHA512SUM}"
+  download_and_extract 'uassets-prod' "https://github.com/uBlockOrigin/uAssets/archive/${UBIRD_UASSETS_PROD_COMMIT}.tar.gz" "${UBIRD_UASSETS_PROD}" "${UBIRD_UASSETS_PROD_SHA512SUM}"
   if [[ "${UBIRD_PERFORM_POST_DOWNLOAD}" == 1 ]]; then
     echo_green_text "SUCCESS: Set-up uAssets (prod) at ${UBIRD_UASSETS_PROD}"
   fi
@@ -666,43 +666,43 @@ function get_uv() {
 
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
     echo_red_text 'Downloading uv (Linux - ARM64)...'
-    download "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-aarch64-unknown-linux-gnu.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-linux-arm64.tar.gz" "${UV_SHA512SUM_LINUX_ARM64}"
+    download "https://github.com/astral-sh/uv/releases/download/${UBIRD_UV_VERSION}/uv-aarch64-unknown-linux-gnu.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-linux-arm64.tar.gz" "${UBIRD_UV_SHA512SUM_LINUX_ARM64}"
 
     echo_red_text 'Downloading uv (Linux - x86_64)...'
-    download "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-linux-x86_64.tar.gz" "${UV_SHA512SUM_LINUX_X86_64}"
+    download "https://github.com/astral-sh/uv/releases/download/${UBIRD_UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-linux-x86_64.tar.gz" "${UBIRD_UV_SHA512SUM_LINUX_X86_64}"
 
     echo_red_text 'Downloading uv (OS X - ARM64)...'
-    download "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-aarch64-apple-darwin.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-osx-arm64.tar.gz" "${UV_SHA512SUM_OSX_ARM64}"
+    download "https://github.com/astral-sh/uv/releases/download/${UBIRD_UV_VERSION}/uv-aarch64-apple-darwin.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-osx-arm64.tar.gz" "${UBIRD_UV_SHA512SUM_OSX_ARM64}"
 
     echo_red_text 'Downloading uv (OS X - x86_64)...'
-    download "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-apple-darwin.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-osx-x86_64.tar.gz" "${UV_SHA512SUM_OSX_X86_64}"
+    download "https://github.com/astral-sh/uv/releases/download/${UBIRD_UV_VERSION}/uv-x86_64-apple-darwin.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-osx-x86_64.tar.gz" "${UBIRD_UV_SHA512SUM_OSX_X86_64}"
   else
     # Set our platform
     if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
-      local readonly UV_PLATFORM='apple-darwin'
+      local readonly UBIRD_UV_PLATFORM='apple-darwin'
     else
-      local readonly UV_PLATFORM='unknown-linux-gnu'
+      local readonly UBIRD_UV_PLATFORM='unknown-linux-gnu'
     fi
 
     # Set our platform architecture
     if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
-      local readonly UV_ARCH='aarch64'
+      local readonly UBIRD_UV_ARCH='aarch64'
     else
-      local readonly UV_ARCH='x86_64'
+      local readonly UBIRD_UV_ARCH='x86_64'
     fi
 
     # Set our checksum to verify
     if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
       if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
-        local readonly UV_SHA512SUM="${UV_SHA512SUM_OSX_ARM64}"
+        local readonly UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_OSX_ARM64}"
       else
-        local readonly UV_SHA512SUM="${UV_SHA512SUM_LINUX_ARM64}"
+        local readonly UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_LINUX_ARM64}"
       fi
     else
       if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
-        local readonly UV_SHA512SUM="${UV_SHA512SUM_OSX_X86_64}"
+        local readonly UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_OSX_X86_64}"
       else
-        local readonly UV_SHA512SUM="${UV_SHA512SUM_LINUX_X86_64}"
+        local readonly UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_LINUX_X86_64}"
       fi
     fi
 
@@ -713,7 +713,7 @@ function get_uv() {
     local UBIRD_DOWNLOAD_FAILED=0
 
     echo_red_text 'Downloading uv...'
-    download_and_extract 'uv' "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-${UV_ARCH}-${UV_PLATFORM}.tar.gz" "${UBIRD_UV_DIR}" "${UV_SHA512SUM}" || local UBIRD_DOWNLOAD_FAILED=1
+    download_and_extract 'uv' "https://github.com/astral-sh/uv/releases/download/${UBIRD_UV_VERSION}/uv-${UBIRD_UV_ARCH}-${UBIRD_UV_PLATFORM}.tar.gz" "${UBIRD_UV_DIR}" "${UBIRD_UV_SHA512SUM}" || local UBIRD_DOWNLOAD_FAILED=1
 
     # If the download failed, restore our back-up, clean-up, and exit
     if [[ "${UBIRD_DOWNLOAD_FAILED}" == 1 ]]; then
