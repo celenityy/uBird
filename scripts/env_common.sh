@@ -121,6 +121,14 @@ fi
 readonly UBIRD_LOG_DIR
 export UBIRD_LOG_DIR
 
+# Whether we should display verbose build output
+readonly UBIRD_VERBOSE_DEFAULT=0
+if [[ -z "${UBIRD_VERBOSE+x}" ]]; then
+  UBIRD_VERBOSE="${UBIRD_VERBOSE_DEFAULT}"
+fi
+readonly UBIRD_VERBOSE
+export UBIRD_VERBOSE
+
 # basename
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
   readonly UBIRD_BASENAME_DEFAULT='/usr/bin/basename'

@@ -13,6 +13,13 @@ if [[ -z "${UBIRD_FROM_BUILD+x}" ]]; then
   exit 1
 fi
 
+# Set verbosity
+if [[ "${UBIRD_VERBOSE}" == 1 ]]; then
+  set -x
+else
+  set +x
+fi
+
 # Set-up Python environment
 # The Python environment *should* already be created by `get_sources.sh`, but it may not be (ex. if the user provides their own Python and/or
 # doesn't use `get_sources.sh`), so if it doesn't exist then create it
@@ -217,7 +224,7 @@ function build_ubird() {
   echo_red_text "Building uBird ${UBIRD_VERSION}..."
 
   pushd "${UBIRD_UBO}"
-  /bin/bash -x "${UBIRD_UBO}/tools/make-thunderbird.sh" all
+  /bin/bash "${UBIRD_UBO}/tools/make-thunderbird.sh" all
   popd
 
   "${UBIRD_CP}" -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"

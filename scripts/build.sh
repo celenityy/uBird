@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Set-up our environment
 if [[ -z "${UBIRD_SET_ENVS+x}" ]]; then
-  /bin/bash -x $(dirname $0)/env.sh
+  /bin/bash $(dirname $0)/env.sh
 fi
 source $(dirname $0)/env.sh
 
@@ -29,7 +29,7 @@ if [[ "${UBIRD_LOG_BUILD}" == 1 ]]; then
   # Ensure our log directory exists
   "${UBIRD_MKDIR}" -vp "${UBIRD_LOG_DIR}"
 
-  /bin/bash -x "${UBIRD_SCRIPTS}/build-ubird.sh" "${target}" > >("${UBIRD_TEE}" -a "${BUILD_LOG_FILE}") 2>&1
+  /bin/bash "${UBIRD_SCRIPTS}/build-ubird.sh" "${target}" > >("${UBIRD_TEE}" -a "${BUILD_LOG_FILE}") 2>&1
 else
-  /bin/bash -x "${UBIRD_SCRIPTS}/build-ubird.sh" "${target}"
+  /bin/bash "${UBIRD_SCRIPTS}/build-ubird.sh" "${target}"
 fi
