@@ -329,41 +329,19 @@ fi
 readonly UBIRD_RM
 export UBIRD_RM
 
-# sha1sum
+# shasum
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
-  readonly UBIRD_SHA1SUM_DEFAULT='/sbin/sha1sum'
+  readonly UBIRD_SHASUM_DEFAULT='/opt/homebrew/bin/shasum'
+elif [[ "${UBIRD_OS}" == 'secureblue' ]]; then
+  readonly UBIRD_SHASUM_DEFAULT='/home/linuxbrew/.linuxbrew/bin/shasum'
 else
-  readonly UBIRD_SHA1SUM_DEFAULT='/bin/sha1sum'
+  readonly UBIRD_SHASUM_DEFAULT='/bin/shasum'
 fi
-if [[ -z "${UBIRD_SHA1SUM+x}" ]]; then
-  UBIRD_SHA1SUM="${UBIRD_SHA1SUM_DEFAULT}"
+if [[ -z "${UBIRD_SHASUM+x}" ]]; then
+  UBIRD_SHASUM="${UBIRD_SHASUM_DEFAULT}"
 fi
-readonly UBIRD_SHA1SUM
-export UBIRD_SHA1SUM
-
-# sha256sum
-if [[ "${UBIRD_OS}" == 'osx' ]]; then
-  readonly UBIRD_SHA256SUM_DEFAULT='/sbin/sha256sum'
-else
-  readonly UBIRD_SHA256SUM_DEFAULT='/bin/sha256sum'
-fi
-if [[ -z "${UBIRD_SHA256SUM+x}" ]]; then
-  UBIRD_SHA256SUM="${UBIRD_SHA256SUM_DEFAULT}"
-fi
-readonly UBIRD_SHA256SUM
-export UBIRD_SHA256SUM
-
-# sha512sum
-if [[ "${UBIRD_OS}" == 'osx' ]]; then
-  readonly UBIRD_SHA512SUM_DEFAULT='/sbin/sha512sum'
-else
-  readonly UBIRD_SHA512SUM_DEFAULT='/bin/sha512sum'
-fi
-if [[ -z "${UBIRD_SHA512SUM+x}" ]]; then
-  UBIRD_SHA512SUM="${UBIRD_SHA512SUM_DEFAULT}"
-fi
-readonly UBIRD_SHA512SUM
-export UBIRD_SHA512SUM
+readonly UBIRD_SHASUM
+export UBIRD_SHASUM
 
 # tee
 if [[ "${UBIRD_OS}" == 'osx' ]]; then

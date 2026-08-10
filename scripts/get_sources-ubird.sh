@@ -181,13 +181,13 @@ function validate_checksum() {
     local readonly local_checksum=$("${UBIRD_MD5SUM}" "${file}" | "${UBIRD_AWK}" '{print $1}')
   elif [[ "${checksum_type}" == 'sha1sum' ]]; then
     local readonly checksum_type_pretty='SHA1sum'
-    local readonly local_checksum=$("${UBIRD_SHA1SUM}" "${file}" | "${UBIRD_AWK}" '{print $1}')
+    local readonly local_checksum=$("${UBIRD_SHASUM}" -a 1 "${file}" | "${UBIRD_AWK}" '{print $1}')
   elif [[ "${checksum_type}" == 'sha256sum' ]]; then
     local readonly checksum_type_pretty='SHA256sum'
-    local readonly local_checksum=$("${UBIRD_SHA256SUM}" "${file}" | "${UBIRD_AWK}" '{print $1}')
+    local readonly local_checksum=$("${UBIRD_SHASUM}" -a 256 "${file}" | "${UBIRD_AWK}" '{print $1}')
   elif [[ "${checksum_type}" == 'sha512sum' ]]; then
     local readonly checksum_type_pretty='SHA512sum'
-    local readonly local_checksum=$("${UBIRD_SHA512SUM}" "${file}" | "${UBIRD_AWK}" '{print $1}')
+    local readonly local_checksum=$("${UBIRD_SHASUM}" -a 512 "${file}" | "${UBIRD_AWK}" '{print $1}')
   else
     echo_red_text 'ERROR: Unknown checksum type.'
     return 1
