@@ -1,0 +1,34 @@
+name: Lint uBird
+
+on:
+  push:
+    paths:
+      - 'scripts/**/*'
+      - '.forgejo/workflows/**/*'
+
+env:
+  UBIRD_CI: 1
+
+jobs:
+  lint-scripts:
+    runs-on: codeberg-medium
+    container:
+      image: fedora:43
+    steps:
+      - name: Get dependencies
+        run: |
+          set -euo pipefail
+          /bin/sudo /bin/dnf update -y --refresh
+          /bin/sudo /bin/dnf install -y node
+
+      - name: Checkout repo
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+
+      - name: Lint
+        run: |
+          set -euo pipefail
+          /bin/sudo /bin/dnf update -y --refresh
+          /bin/sudo /bin/dnf install -y bash curl shasum tar
+          /bin/bash scripts/get_sources.sh shellcheck
+          /bin/bash scripts/get_sources.sh shfmt
+          /bin/bash scripts/lint.sh

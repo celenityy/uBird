@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Set platform
 if [[ "${OSTYPE}" == "darwin"* ]]; then
   readonly UBIRD_PLATFORM='darwin'

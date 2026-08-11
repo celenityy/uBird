@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # uBird external environment variables
 
 ## This is used for converting uBird-specific environment variables to ones used in external projects.
@@ -25,7 +26,7 @@ export PYTHON_DISABLE_REMOTE_DEBUG
 readonly PYTHONOPTIMIZE=1
 export PYTHONOPTIMIZE
 
-# UV
+# uv
 ## https://docs.astral.sh/uv/reference/environment/
 
 ## Cache directory

@@ -206,11 +206,11 @@ function prep_ubird() {
 
   # Set add-on ID
   if [[ "${UBIRD_BUILD_ATN}" == 1 ]]; then
-    "${UBIRD_SED}" -i -e "s|\"id\": \".*\"|\"id\": \""${UBIRD_ATN_ADDON_ID}"\"|g" "${UBIRD_OUTPUTS}/atn/manifest.json"
+    "${UBIRD_SED}" -i -e "s|\"id\": \".*\"|\"id\": \"${UBIRD_ATN_ADDON_ID}\"|g" "${UBIRD_OUTPUTS}/atn/manifest.json"
     "${UBIRD_SED}" -i -e "s|uBlock0@raymondhill.net|${UBIRD_ATN_ADDON_ID}|g" "${UBIRD_OUTPUTS}/atn/manifest.json"
   fi
   if [[ "${UBIRD_BUILD_DIRECT}" == 1 ]]; then
-    "${UBIRD_SED}" -i -e "s|\"id\": \".*\"|\"id\": \""${UBIRD_ADDON_ID}"\"|g" "${UBIRD_OUTPUTS}/direct/manifest.json"
+    "${UBIRD_SED}" -i -e "s|\"id\": \".*\"|\"id\": \"${UBIRD_ADDON_ID}\"|g" "${UBIRD_OUTPUTS}/direct/manifest.json"
     "${UBIRD_SED}" -i -e "s|uBlock0@raymondhill.net|${UBIRD_ADDON_ID}|g" "${UBIRD_OUTPUTS}/direct/manifest.json"
   fi
 

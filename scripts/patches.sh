@@ -25,18 +25,20 @@ readonly PATCH_CMD=("${UBIRD_PATCH}" -p1 --no-backup-if-mismatch)
 declare -a PATCH_FILES
 declare -a ATN_PATCH_FILES
 
+# shellcheck disable=SC2207
 readonly PATCH_FILES=($("${UBIRD_YQ}" '.patches[].file' "$("${UBIRD_DIRNAME}" "$0")"/patches.yaml))
+# shellcheck disable=SC2207
 readonly ATN_PATCH_FILES=($("${UBIRD_YQ}" '.patches[].file' "$("${UBIRD_DIRNAME}" "$0")"/patches-atn.yaml))
 
 function check_patch() {
-  local readonly patch="${UBIRD_PATCHES}/$1"
+  local -r patch="${UBIRD_PATCHES}/$1"
   if [[ ! -f "${patch}" ]]; then
     printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "$patch")"
     echo "'$patch' does not exist or is not a file"
     return 1
   fi
 
-  if ! "${PATCH_CMD[@]}" --dry-run <"${patch}"; then
+  if ! "${PATCH_CMD[@]}" --dry-run < "${patch}"; then
     printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Incompatible patch: '${patch}'"
     return 1
@@ -61,7 +63,7 @@ function check_patches_atn() {
 
 function test_patches() {
   for patch in "${PATCH_FILES[@]}"; do
-    if ! check_patch "${patch}" >/dev/null 2>&1; then
+    if ! check_patch "${patch}" > /dev/null 2>&1; then
       printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     else
       printf "${GREEN}✓ %-45s: OK${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
@@ -71,7 +73,7 @@ function test_patches() {
 
 function test_patches_atn() {
   for patch in "${ATN_PATCH_FILES[@]}"; do
-    if ! check_patch "${patch}" >/dev/null 2>&1; then
+    if ! check_patch "${patch}" > /dev/null 2>&1; then
       printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     else
       printf "${GREEN}✓ %-45s: OK${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
@@ -80,10 +82,10 @@ function test_patches_atn() {
 }
 
 function apply_patch() {
-  local readonly name="$1"
+  local -r name="$1"
   echo "Applying patch: ${name}"
   check_patch "${name}" || return 1
-  "${PATCH_CMD[@]}" <"${UBIRD_PATCHES}/${name}"
+  "${PATCH_CMD[@]}" < "${UBIRD_PATCHES}/${name}"
   return $?
 }
 
@@ -120,19 +122,19 @@ function list_patches_atn() {
 }
 
 function slugify() {
-  local readonly input="$1"
-  echo "${input}" |                  \
-    "${UBIRD_TR}" '[:upper:]' '[:lower:]' | \
-    "${UBIRD_SED}" -E 's/[^a-z0-9]+/-/g' |  \
+  local -r input="$1"
+  echo "${input}" |
+    "${UBIRD_TR}" '[:upper:]' '[:lower:]' |
+    "${UBIRD_SED}" -E 's/[^a-z0-9]+/-/g' |
     "${UBIRD_SED}" -E 's/^-+|-+$//g'
 }
 
 # Function to rebase a single patch file atomically
 # Usage: rebase_patch <compatible_tag> <target_tag> <patch_file_path>
 function rebase_patch() {
-  local readonly compatible_tag="$1"
-  local readonly target_tag="$2"
-  local readonly patch_file="$3"
+  local -r compatible_tag="$1"
+  local -r target_tag="$2"
+  local -r patch_file="$3"
 
   # Validate inputs
   if [[ -z "${compatible_tag}" || -z "${target_tag}" || -z "${patch_file}" ]]; then
@@ -149,37 +151,37 @@ function rebase_patch() {
   fi
 
   # Store original state for rollback
-  local readonly original_branch=$("${UBIRD_GIT}" rev-parse --abbrev-ref HEAD 2>/dev/null)
+  local -r original_branch=$("${UBIRD_GIT}" rev-parse --abbrev-ref HEAD 2> /dev/null)
 
-  local readonly original_stash_count=$("${UBIRD_GIT}" stash list | "${UBIRD_WC}" -l)
+  local -r original_stash_count=$("${UBIRD_GIT}" stash list | "${UBIRD_WC}" -l)
 
-  local readonly patch_name=$("${UBIRD_BASENAME}" "${patch_file}" .patch)
+  local -r patch_name=$("${UBIRD_BASENAME}" "${patch_file}" .patch)
 
-  local readonly branch_name="rebase-${patch_name}"
+  local -r branch_name="rebase-${patch_name}"
 
   function cleanup_and_rollback() {
     echo "Error occurred, rolling back changes..." >&2
 
     # Check if we're in the middle of a rebase and abort it
-    if "${UBIRD_GIT}" status --porcelain=v1 2>/dev/null | "${UBIRD_GREP}" -q "^R" ||
-     [[ -d "$("${UBIRD_GIT}" rev-parse --git-dir)/rebase-merge" ]] ||
-     [[ -d "$("${UBIRD_GIT}" rev-parse --git-dir)/rebase-apply" ]]; then
+    if "${UBIRD_GIT}" status --porcelain=v1 2> /dev/null | "${UBIRD_GREP}" -q "^R" ||
+      [[ -d "$("${UBIRD_GIT}" rev-parse --git-dir)/rebase-merge" ]] ||
+      [[ -d "$("${UBIRD_GIT}" rev-parse --git-dir)/rebase-apply" ]]; then
       echo "Aborting rebase in progress..."
-      "${UBIRD_GIT}" rebase --abort 2>/dev/null
+      "${UBIRD_GIT}" rebase --abort 2> /dev/null
     fi
 
     # Switch back to original branch if it exists
     if [[ -n "${original_branch}" && "${original_branch}" != "HEAD" ]]; then
-      "${UBIRD_GIT}" checkout "${original_branch}" 2>/dev/null
+      "${UBIRD_GIT}" checkout "${original_branch}" 2> /dev/null
     fi
 
     # Delete the temporary branch if it was created
-    "${UBIRD_GIT}" branch -D "${branch_name}" 2>/dev/null
+    "${UBIRD_GIT}" branch -D "${branch_name}" 2> /dev/null
 
     # Restore stashed changes if any were created
-    local readonly current_stash_count=$("${UBIRD_GIT}" stash list | "${UBIRD_WC}" -l)
+    local -r current_stash_count=$("${UBIRD_GIT}" stash list | "${UBIRD_WC}" -l)
     if [[ "${current_stash_count}" -gt "${original_stash_count}" ]]; then
-      "${UBIRD_GIT}" stash pop 2>/dev/null
+      "${UBIRD_GIT}" stash pop 2> /dev/null
     fi
 
     return 1
@@ -196,14 +198,14 @@ function rebase_patch() {
   fi
 
   # Check if tags exist
-  if ! "${UBIRD_GIT}" rev-parse --verify "${compatible_tag}" >/dev/null 2>&1; then
+  if ! "${UBIRD_GIT}" rev-parse --verify "${compatible_tag}" > /dev/null 2>&1; then
     printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Compatible tag '${compatible_tag}' does not exist" >&2
     cleanup_and_rollback
     return 1
   fi
 
-  if ! "${UBIRD_GIT}" rev-parse --verify "${target_tag}" >/dev/null 2>&1; then
+  if ! "${UBIRD_GIT}" rev-parse --verify "${target_tag}" > /dev/null 2>&1; then
     printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Target tag '${target_tag}' does not exist" >&2
     cleanup_and_rollback
@@ -246,7 +248,7 @@ function rebase_patch() {
   fi
 
   # Commit the changes
-  local readonly commit_message="Apply patch $("${UBIRD_BASENAME}" "${patch_file}") - rebased to ${target_tag}"
+  local -r commit_message="Apply patch $("${UBIRD_BASENAME}" "${patch_file}") - rebased to ${target_tag}"
   echo "Committing changes..."
   if ! "${UBIRD_GIT}" commit -m "${commit_message}"; then
     printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
@@ -266,8 +268,8 @@ function rebase_patch() {
 
   # Update the patch file using git format-patch
   echo "Updating patch file..."
-  local readonly temp_patch=$("${UBIRD_MKTEMP}")
-  if ! "${UBIRD_GIT}" format-patch -1 --stdout >"${temp_patch}"; then
+  local -r temp_patch=$("${UBIRD_MKTEMP}")
+  if ! "${UBIRD_GIT}" format-patch -1 --stdout > "${temp_patch}"; then
     printf "${RED}✗ %-45s: FAILED${NC}\n" "$("${UBIRD_BASENAME}" "${patch}")"
     echo "Failed to generate new patch" >&2
     "${UBIRD_RM}" -f "${temp_patch}"
@@ -294,7 +296,7 @@ function rebase_patch() {
   "${UBIRD_GIT}" branch -D "${branch_name}"
 
   # Restore stashed changes if any
-  local readonly current_stash_count=$("${UBIRD_GIT}" stash list | "${UBIRD_WC}" -l)
+  local -r current_stash_count=$("${UBIRD_GIT}" stash list | "${UBIRD_WC}" -l)
   if [[ "${current_stash_count}" -gt "${original_stash_count}" ]]; then
     echo "Restoring stashed changes..."
     "${UBIRD_GIT}" stash pop
@@ -308,8 +310,8 @@ function rebase_patch() {
 # Function to rebase multiple patch files
 # Usage: rebase_patches <compatible_tag> <target_tag> <patch_file1> [patch_file2] [...]
 function rebase_patches() {
-  local readonly compatible_tag="$1"
-  local readonly target_tag="$2"
+  local -r compatible_tag="$1"
+  local -r target_tag="$2"
 
   # Validate inputs
   if [[ -z "${compatible_tag}" || -z "${target_tag}" ]]; then

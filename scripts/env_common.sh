@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # uBird common environment variables
 
 ## CAUTION: Do NOT source this directly!
@@ -39,6 +40,10 @@ export UBIRD_BUILD
 readonly UBIRD_PATH="${UBIRD_BUILD}/path"
 export UBIRD_PATH
 
+# Minimal uBird PATH for linting
+readonly UBIRD_LINT_PATH="${UBIRD_BUILD}/lint-path"
+export UBIRD_LINT_PATH
+
 # External sources directory
 readonly UBIRD_EXTERNAL="${UBIRD_ROOT}/external"
 export UBIRD_EXTERNAL
@@ -50,6 +55,20 @@ export UBIRD_DOWNLOADS
 # Patches directory
 readonly UBIRD_PATCHES="${UBIRD_ROOT}/patches"
 export UBIRD_PATCHES
+
+# Are we in a CI environment?
+readonly UBIRD_CI_DEFAULT=0
+if [[ -z "${UBIRD_CI+x}" ]]; then
+  UBIRD_CI="${UBIRD_CI_DEFAULT}"
+fi
+readonly UBIRD_CI
+export UBIRD_CI
+
+## If so, set our CI environment variables
+readonly UBIRD_ENV_CI="${UBIRD_SCRIPTS}/env_ci.sh"
+if [[ "${UBIRD_CI}" == 1 ]]; then
+  source "${UBIRD_ENV_CI}"
+fi
 
 # Version info
 readonly UBIRD_VERSIONS="${UBIRD_SCRIPTS}/versions.sh"
@@ -148,6 +167,14 @@ if [[ -z "${UBIRD_CAT+x}" ]]; then
 fi
 readonly UBIRD_CAT
 export UBIRD_CAT
+
+# chmod
+readonly UBIRD_CHMOD_DEFAULT='/bin/chmod'
+if [[ -z "${UBIRD_CHMOD+x}" ]]; then
+  UBIRD_CHMOD="${UBIRD_CHMOD_DEFAULT}"
+fi
+readonly UBIRD_CHMOD
+export UBIRD_CHMOD
 
 # cp
 readonly UBIRD_CP_DEFAULT='/bin/cp'
@@ -343,6 +370,26 @@ fi
 readonly UBIRD_SHASUM
 export UBIRD_SHASUM
 
+# -shellcheck
+readonly UBIRD_SHELLCHECK_DIR_DEFAULT="${UBIRD_EXTERNAL}/shellcheck"
+if [[ -z "${UBIRD_SHELLCHECK_DIR+x}" ]]; then
+  UBIRD_SHELLCHECK_DIR="${UBIRD_SHELLCHECK_DIR_DEFAULT}"
+fi
+readonly UBIRD_SHELLCHECK_DIR
+readonly UBIRD_SHELLCHECK="${UBIRD_SHELLCHECK_DIR}/shellcheck"
+export UBIRD_SHELLCHECK
+export UBIRD_SHELLCHECK_DIR
+
+# shfmt
+readonly UBIRD_SHFMT_DIR_DEFAULT="${UBIRD_EXTERNAL}/shfmt"
+if [[ -z "${UBIRD_SHFMT_DIR+x}" ]]; then
+  UBIRD_SHFMT_DIR="${UBIRD_SHFMT_DIR_DEFAULT}"
+fi
+readonly UBIRD_SHFMT_DIR
+readonly UBIRD_SHFMT="${UBIRD_SHFMT_DIR}/shfmt"
+export UBIRD_SHFMT
+export UBIRD_SHFMT_DIR
+
 # tee
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
   readonly UBIRD_TEE_DEFAULT='/usr/bin/tee'
@@ -354,6 +401,18 @@ if [[ -z "${UBIRD_TEE+x}" ]]; then
 fi
 readonly UBIRD_TEE
 export UBIRD_TEE
+
+# touch
+if [[ "${UBIRD_OS}" == 'osx' ]]; then
+  readonly UBIRD_TOUCH_DEFAULT='/usr/bin/touch'
+else
+  readonly UBIRD_TOUCH_DEFAULT='/bin/touch'
+fi
+if [[ -z "${UBIRD_TOUCH+x}" ]]; then
+  UBIRD_TOUCH="${UBIRD_TOUCH_DEFAULT}"
+fi
+readonly UBIRD_TOUCH
+export UBIRD_TOUCH
 
 # tr
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -403,6 +462,18 @@ fi
 readonly UBIRD_WC
 export UBIRD_WC
 
+# xz
+if [[ "${UBIRD_OS}" == 'osx' ]]; then
+  readonly UBIRD_XZ_DEFAULT='/opt/homebrew/bin/xz'
+else
+  readonly UBIRD_XZ_DEFAULT='/bin/xz'
+fi
+if [[ -z "${UBIRD_XZ+x}" ]]; then
+  UBIRD_XZ="${UBIRD_XZ_DEFAULT}"
+fi
+readonly UBIRD_XZ
+export UBIRD_XZ
+
 # yq
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
   readonly UBIRD_YQ_DEFAULT='/opt/homebrew/bin/yq'
@@ -433,7 +504,7 @@ fi
 readonly UBIRD_PYTHON_DIR
 export UBIRD_PYTHON_DIR
 
-# Python (UV) environment
+# Python (uv) environment
 readonly UBIRD_PYENV_DIR_DEFAULT="${UBIRD_BUILD}/pyenv"
 if [[ -z "${UBIRD_PYENV_DIR+x}" ]]; then
   UBIRD_PYENV_DIR="${UBIRD_PYENV_DIR_DEFAULT}"
@@ -551,14 +622,17 @@ readonly UBIRD_CURL_FLAGS_OVERRIDE
 export UBIRD_CURL_FLAGS_OVERRIDE
 
 # curl flags
+# shellcheck disable=SC2089
 readonly UBIRD_CURL_FLAGS_DEFAULT="--disable --no-netrc --ciphers ${UBIRD_NONTLS13_CIPHERS} --clobber --create-dirs --delegation none --disallow-username-in-url --doh-cert-status --fail --fail-early --junk-session-cookies --no-basic --no-ca-native --no-digest --no-doh-insecure --no-http0.9 --no-insecure --no-negotiate --no-ntlm --no-proxy-basic --no-proxy-ca-native --no-proxy-digest --no-proxy-insecure --no-proxy-ssl-auto-client-cert --no-sessionid --no-ssl-auto-client-cert --no-ssl-no-revoke --no-ssl-revoke-best-effort --no-xattr --parallel --post301 --post302 --post303 --progress-meter --proto -all,https --proto-default https --proto-redir -all,https --proxy-ciphers ${UBIRD_NONTLS13_CIPHERS} --proxy-tls13-ciphers ${UBIRD_TLS13_CIPHERS} --referer '' --remove-on-error --retry 5 --retry-all-errors --retry-connrefused --show-error --tls13-ciphers ${UBIRD_TLS13_CIPHERS} --tlsv1.2 --trace-time --user-agent '' --verbose"
 if [[ -z "${UBIRD_CURL_FLAGS+x}" ]]; then
-  readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
+  UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
 elif [[ "${UBIRD_CURL_FLAGS_OVERRIDE}" == 1 ]]; then
-  readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS}"
+  UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS}"
 else
-  readonly UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT} ${UBIRD_CURL_FLAGS}"
+  UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT} ${UBIRD_CURL_FLAGS}"
 fi
+readonly UBIRD_CURL_FLAG
+# shellcheck disable=SC2090
 export UBIRD_CURL_FLAGS
 
 # Set our external environment variables
