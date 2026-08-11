@@ -135,10 +135,6 @@ fi
 # For checking/applying patch files
 source "${UBIRD_SCRIPTS}/patches.sh"
 
-if [[ ! -f "${UBIRD_BUILD}/temp-manifest.json" ]]; then
-  "${UBIRD_CP}" "${UBIRD_UBO}/platform/thunderbird/manifest.json" "${UBIRD_BUILD}/temp-manifest.json"
-fi
-
 function prep_check_patches() {
   if [[ "${UBIRD_BUILD_ATN}" == 1 ]]; then
     if ! check_patches_atn; then
@@ -158,6 +154,7 @@ function set_version() {
   # Set uBird version
   pushd "${UBIRD_UBO}"
   "${UBIRD_SED}" -i "s|${UBIRD_UBLOCK_VERSION}|${UBIRD_VERSION}|" "${UBIRD_UBO}/dist/version"
+  "${UBIRD_SED}" -i -e "s|\"version\": \".*\"|\"version\": \"${UBIRD_VERSION}\"|g" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
   popd
 }
 
@@ -165,6 +162,10 @@ function prep_ubird() {
   # uBird
   echo_red_text 'Preparing your build environment...'
   pushd "${UBIRD_UBO}"
+
+  if [[ ! -f "${UBIRD_BUILD}/temp-manifest.json" ]]; then
+    "${UBIRD_CP}" "${UBIRD_UBO}/platform/thunderbird/manifest.json" "${UBIRD_BUILD}/temp-manifest.json"
+  fi
 
   if [[ -f "${UBIRD_UBO}/platform/thunderbird/manifest.json" ]]; then
     "${UBIRD_RM}" "${UBIRD_UBO}/platform/thunderbird/manifest.json"
