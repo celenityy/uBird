@@ -8,16 +8,12 @@ source $(dirname $0)/env.sh
 # Include utilities
 source "${UBIRD_UTILS}"
 
+# Set verbosity
+set_verbosity
+
 if [[ -z "${UBIRD_FROM_SOURCES+x}" ]]; then
   echo_red_text "ERROR: Do not call get_sources-ubird.sh directly. Instead, use get_sources.sh." >&1
   exit 1
-fi
-
-# Set verbosity
-if [[ "${UBIRD_VERBOSE}" == 1 ]]; then
-  set -x
-else
-  set +x
 fi
 
 readonly target="$1"

@@ -28,7 +28,7 @@ if [[ -f "${UBIRD_ENV_OVERRIDE}" ]]; then
   source "${UBIRD_ENV_OVERRIDE}"
 fi
 
-## uBird utilities
+# Utilities
 readonly UBIRD_UTILS="${UBIRD_SCRIPTS}/utilities.sh"
 export UBIRD_UTILS
 
