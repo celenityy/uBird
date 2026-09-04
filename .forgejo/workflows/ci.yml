@@ -1,4 +1,5 @@
-name: Lint uBird
+# yaml-language-server: $schema=https://www.schemastore.org/github-workflow.json
+name: CI
 
 on:
   push:
@@ -10,7 +11,8 @@ env:
   UBIRD_CI: 1
 
 jobs:
-  lint-scripts:
+  lint:
+    name: Lint
     runs-on: codeberg-medium
     container:
       image: fedora:43
