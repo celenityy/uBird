@@ -9,13 +9,14 @@ on:
 
 env:
   UBIRD_CI: 1
+  UBIRD_FEDORA_VERSION: "44"
 
 jobs:
   lint:
     name: Lint
     runs-on: codeberg-medium
     container:
-      image: fedora:43
+      image: fedora:${{ env.UBIRD_FEDORA_VERSION }}
     steps:
       - name: Get dependencies
         run: |
