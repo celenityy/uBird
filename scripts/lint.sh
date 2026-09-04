@@ -19,12 +19,12 @@ set -euo pipefail
 readonly UBIRD_LINTING=1
 export UBIRD_LINTING
 if [[ -z "${UBIRD_SET_ENVS+x}" ]]; then
-  /bin/bash $(dirname $0)/env.sh
+  /bin/bash $(dirname $0)/env.sh || exit 1
 fi
-source $(dirname $0)/env.sh
+source $(dirname $0)/env.sh || exit 1
 
 # Include utilities
-source "${UBIRD_UTILS}"
+source "${UBIRD_UTILS}" || exit 1
 
 # Set verbosity
 set_verbosity

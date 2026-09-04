@@ -32,6 +32,14 @@ fi
 readonly UBIRD_UTILS="${UBIRD_SCRIPTS}/utilities.sh"
 export UBIRD_UTILS
 
+# Download utilities
+readonly UBIRD_DOWNLOAD_UTILS="${UBIRD_SCRIPTS}/download-utilities.sh"
+export UBIRD_DOWNLOAD_UTILS
+
+# File utilities
+readonly UBIRD_FILE_UTILS="${UBIRD_SCRIPTS}/file-utilities.sh"
+export UBIRD_FILE_UTILS
+
 # Build directory
 readonly UBIRD_BUILD="${UBIRD_ROOT}/build"
 export UBIRD_BUILD

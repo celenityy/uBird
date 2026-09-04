@@ -3,16 +3,16 @@
 set -euo pipefail
 
 # Set-up our environment
-source $(dirname $0)/env.sh
+source $(dirname $0)/env.sh || exit 1
 
 # Include utilities
-source "${UBIRD_UTILS}"
+source "${UBIRD_UTILS}" || exit 1
 
 # Set verbosity
 set_verbosity
 
 if [[ -z "${UBIRD_FROM_BUILD+x}" ]]; then
-  echo_red_text 'ERROR: Do not call build-ubird.sh directly. Instead, use build.sh.' >&1
+  echo_red_text "ERROR: Do not call 'build-ubird.sh' directly! Instead, use 'build.sh'." >&1
   exit 1
 fi
 
@@ -22,7 +22,7 @@ fi
 if [[ ! -f "${UBIRD_PYENV}" ]]; then
   "${UBIRD_UV}" venv "${UBIRD_PYENV_DIR}"
 fi
-source "${UBIRD_PYENV}"
+source "${UBIRD_PYENV}" || exit 1
 
 readonly target="$1"
 
@@ -50,7 +50,7 @@ readonly UBIRD_BUILD_ATN
 readonly UBIRD_BUILD_DIRECT
 
 # Include version info
-source "${UBIRD_VERSIONS}"
+source "${UBIRD_VERSIONS}" || exit 1
 
 if [[ "${UBIRD_BUILD_ATN}" == 1 ]]; then
   if [[ -z "${UBIRD_ATN_ADDON_ID}" ]]; then
@@ -221,7 +221,7 @@ function build_ubird() {
   echo_red_text "Building uBird ${UBIRD_VERSION}..."
 
   pushd "${UBIRD_UBO}"
-  /bin/bash "${UBIRD_UBO}/tools/make-thunderbird.sh" all
+  /bin/bash "${UBIRD_UBO}/tools/make-thunderbird.sh" all || exit 1
   popd
 
   "${UBIRD_CP}" -f "${UBIRD_BUILD}/temp-manifest.json" "${UBIRD_UBO}/platform/thunderbird/manifest.json"

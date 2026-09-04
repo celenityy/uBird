@@ -6,7 +6,11 @@ readonly UBIRD_UBLOCK_COMMIT='6dd2d95e50d134a477a4e183343c0b26e9147123'
 readonly UBIRD_UBLOCK_SHA512SUM='f01547c7ba40b611db171927fe3a0faeeff8a6a9f1704dd96c22bf604feaa8c2b4c2012e08fb69a3d983eb7bec314d73933dddfa4ff771d2cf5abb0d763eb8a4'
 readonly UBIRD_UBLOCK_VERSION='1.74.0'
 
+# uBird
 readonly UBIRD_VERSION="${UBIRD_UBLOCK_VERSION}"
+
+# This value is used for ex. producing reproducable archives, and its value should be bumped upon new releases
+readonly UBIRD_VERSION_DATE='2026.09.04'
 
 # uAssets (main)
 # https://github.com/uBlockOrigin/uAssets/tree/master
