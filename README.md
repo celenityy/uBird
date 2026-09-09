@@ -2,7 +2,9 @@
 
 Resources to build uBlock Origin for Thunderbird.
 
-Builds can be found [here](https://gitlab.com/celenityy/uBird/-/tree/main/outputs). In particular, the latest build can always be found [here](https://gitlab.com/celenityy/uBird/-/raw/main/outputs/uBird_latest.xpi).
+## Download
+
+uBird can be downloaded from [`https://addons.thunderbird.net`](https://addons.thunderbird.net/thunderbird/addon/ubird/), or directly from [`https://releases.celenity.dev`](https://releases.celenity.dev/addons/ubird/releases/ubird-latest.xpi).
 
 ## Why?
 
