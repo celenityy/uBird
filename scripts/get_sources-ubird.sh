@@ -636,7 +636,7 @@ function download_and_extract() {
   extract_archive "${temp_archive_path}" "${path}"
 
   # Clean-up
-  "${UBIRD_RM}" -rf "${UBIRD_EXTERNAL}/temp/backup/${repo_name}"
+  "${UBIRD_RM}" -rf "${UBIRD_EXTERNAL}/temp/backup/${temp_archive_path}"
 }
 
 # Get Python
