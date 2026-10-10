@@ -13,13 +13,37 @@ function echo_green_text() {
   echo -e "\033[32m$1\033[0m"
 }
 
+# Verify that an environment variable exists
+function verify_env() {
+  function print_usage() {
+    echo "Usage: verify_env 'environment_variable' 'ENVIRONMENT_VARIABLE_AS_A_STRING'"
+  }
+
+  if [[ -z "${1+x}" ]]; then
+    echo_red_text 'ERROR: Please specify an environment variable!'
+    print_usage
+    return 1
+  fi
+
+  if [[ -z "${2+x}" ]]; then
+    echo_red_text 'ERROR: Please specify an environment variable as a string!'
+    print_usage
+    return 1
+  fi
+
+  local -r env="$1"
+  local -r env_string="$2"
+
+  if [[ -z "${env_string+x}" ]] || [[ "${env}" == "" ]] || [[ "${env}" == "null" ]]; then
+    echo_red_text "ERROR: Environment variable is missing: '${env_string}'!"
+    return 1
+  fi
+}
+
 # Set the verbosity of a script
 ## (From the value of the `UBIRD_VERBOSE` environment variable)
 function set_verbosity() {
-  if [[ -z "${UBIRD_VERBOSE+x}" ]]; then
-    echo_red_text "ERROR: 'UBIRD_VERBOSE' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_VERBOSE}" 'UBIRD_VERBOSE' || return 1
 
   if [[ "${UBIRD_VERBOSE}" == 1 ]]; then
     set -x
@@ -37,22 +61,19 @@ function verify_exec() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please specify an executable!'
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${2+x}" ]]; then
     echo_red_text 'ERROR: Please specify an environment variable that corresponds to an executable!'
     print_usage
-    exit 1
+    return 1
   fi
 
   local -r exec="$1"
   local -r exec_env="$2"
 
-  if [[ -z "${exec_env+x}" ]]; then
-    echo_red_text "ERROR: Environment variable is missing: '${exec_env}'!"
-    exit 1
-  fi
+  verify_env "${exec}" "${exec_env}" || return 1
 
   if [[ ! -f "${exec}" ]]; then
     echo_red_text "ERROR: '${exec}' is missing!"
@@ -82,7 +103,7 @@ function verify_file() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please specify the path to a file to verify!'
     print_usage
-    exit 1
+    return 1
   fi
 
   local -r verify_file="$1"
@@ -107,22 +128,19 @@ function verify_file_with_env() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please specify the path to a file to verify!'
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${2+x}" ]]; then
     echo_red_text 'ERROR: Please specify the environment variable that corresponds to the file to verify!'
     print_usage
-    exit 1
+    return 1
   fi
 
   local -r verify_file="$1"
   local -r verify_file_env="$2"
 
-  if [[ -z "${verify_file_env+x}" ]]; then
-    echo_red_text "ERROR: Environment variable is missing: '${verify_file_env}'!"
-    exit 1
-  fi
+  verify_env "${verify_file}" "${verify_file_env}" || return 1
 
   if [[ "${verify_file}" == 'null' ]]; then
     echo_red_text "ERROR: Environment variable has not been specified: '${verify_file_env}'!"
@@ -136,6 +154,60 @@ function verify_file_with_env() {
 
   if [[ ! -s "${verify_file}" ]]; then
     echo_red_text "ERROR: Environment variable: '${verify_file_env}' is set, but file: '${verify_file}' is empty!"
+    return 1
+  fi
+}
+
+# Verify that a directory exists
+function verify_dir() {
+  function print_usage() {
+    echo "Usage: verify_dir '/path/to/dir'"
+  }
+
+  if [[ -z "${1+x}" ]]; then
+    echo_red_text 'ERROR: Please specify the path to a directory to verify!'
+    print_usage
+    return 1
+  fi
+
+  local -r verify_dir="$1"
+
+  if [[ ! -d "${verify_dir}" ]]; then
+    echo_red_text "ERROR: Directory does not exist: '${verify_dir}'!"
+    return 1
+  fi
+}
+
+# Verify that a directory (corresponding to an environment variable) exists
+function verify_dir_with_env() {
+  function print_usage() {
+    echo "Usage: verify_dir_with_env '/path/to/dir' 'ENVIRONMENT_VARIABLE_FOR_DIR'"
+  }
+
+  if [[ -z "${1+x}" ]]; then
+    echo_red_text 'ERROR: Please specify the path to a directory to verify!'
+    print_usage
+    exit 1
+  fi
+
+  if [[ -z "${2+x}" ]]; then
+    echo_red_text 'ERROR: Please specify the environment variable that corresponds to the directory to verify!'
+    print_usage
+    exit 1
+  fi
+
+  local -r verify_dir="$1"
+  local -r verify_dir_env="$2"
+
+  verify_env "${verify_dir}" "${verify_dir_env}" || return 1
+
+  if [[ "${verify_dir}" == 'null' ]]; then
+    echo_red_text "ERROR: Environment variable has not been specified: '${verify_dir_env}'!"
+    return 1
+  fi
+
+  if [[ ! -d "${verify_dir}" ]]; then
+    echo_red_text "ERROR: Environment variable: '${verify_dir_env}' is set, but directory: '${verify_dir}' does not exist!"
     return 1
   fi
 }

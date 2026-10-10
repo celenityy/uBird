@@ -1,4 +1,5 @@
 # shellcheck shell=bash
 # uBird CI environment variables
 
-# (Currently empty...)
+# Log directory
+export UBIRD_LOG_DIR="${UBIRD_LOG_ARTIFACTS}"

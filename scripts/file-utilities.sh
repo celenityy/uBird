@@ -4,18 +4,9 @@ set -euo pipefail
 
 # File utility functions
 
-# Set-up our environment
-if [[ -z "${UBIRD_SET_ENVS+x}" ]]; then
-  /bin/bash $(dirname $0)/env.sh || exit 1
-fi
-source $(dirname $0)/env.sh || exit 1
-
-# Include utilities
-source "${UBIRD_UTILS}" || exit 1
-
 # Produce a (reproducible) archive from a directory
 ## For reference/details on this process, see...
-## https://codeberg.org/celenity/Phoenix/issues/314
+## https://codeberg.org/celenity/bugs/issues/360
 ## https://www.gnu.org/software/tar/manual/html_node/Reproducibility.html
 ## https://wiki.debian.org/ReproducibleBuilds/TimestampsInZip
 ## https://stackoverflow.com/questions/52668432/tar-package-has-different-checksum-for-exactly-the-same-content
@@ -27,52 +18,49 @@ function create_archive() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please specify the path to a directory!'
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${2+x}" ]]; then
     echo_red_text 'ERROR: Please specify the path to the desired output archive!'
     print_usage
-    exit 1
+    return 1
   fi
 
   # Ensure we have dirname
-  verify_exec "${UBIRD_DIRNAME}" 'UBIRD_DIRNAME' || exit 1
+  verify_exec "${UBIRD_DIRNAME}" 'UBIRD_DIRNAME' || return 1
 
   # Ensure we have dot_clean
   if [[ "${UBIRD_OS}" == 'osx' ]]; then
-    verify_exec "${UBIRD_DOT_CLEAN}" 'UBIRD_DOT_CLEAN' || exit 1
+    verify_exec "${UBIRD_DOT_CLEAN}" 'UBIRD_DOT_CLEAN' || return 1
   fi
 
   # Ensure we have find
-  verify_exec "${UBIRD_FIND}" 'UBIRD_FIND' || exit 1
+  verify_exec "${UBIRD_FIND}" 'UBIRD_FIND' || return 1
 
   # Ensure we have GNU date
-  verify_exec "${UBIRD_DATE}" 'UBIRD_DATE' || exit 1
+  verify_exec "${UBIRD_DATE}" 'UBIRD_DATE' || return 1
 
   # Ensure we have head
-  verify_exec "${UBIRD_HEAD}" 'UBIRD_HEAD' || exit 1
+  verify_exec "${UBIRD_HEAD}" 'UBIRD_HEAD' || return 1
 
   # Ensure we have ls
-  verify_exec "${UBIRD_LS}" 'UBIRD_LS' || exit 1
+  verify_exec "${UBIRD_LS}" 'UBIRD_LS' || return 1
 
   # Ensure we have mkdir
-  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || exit 1
+  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || return 1
 
   # Ensure we have rm
-  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || return 1
 
   # Ensure we have touch
-  verify_exec "${UBIRD_TOUCH}" 'UBIRD_TOUCH' || exit 1
+  verify_exec "${UBIRD_TOUCH}" 'UBIRD_TOUCH' || return 1
 
   # Ensure we have xargs
-  verify_exec "${UBIRD_XARGS}" 'UBIRD_XARGS' || exit 1
+  verify_exec "${UBIRD_XARGS}" 'UBIRD_XARGS' || return 1
 
   # Ensure we have `UBIRD_VERSION_DATE`
-  if [[ -z "${UBIRD_VERSION_DATE+x}" ]] || [[ "${UBIRD_VERSION_DATE}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_VERSION_DATE' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_VERSION_DATE}" 'UBIRD_VERSION_DATE' || return 1
 
   local -r target_dir="$1"
   local -r output_archive="$2"
@@ -81,26 +69,24 @@ function create_archive() {
   case "${output_archive}" in
     *.zip)
       # Ensure we have zip
-      verify_exec "${UBIRD_ZIP}" 'UBIRD_ZIP' || exit 1
+      verify_exec "${UBIRD_ZIP}" 'UBIRD_ZIP' || return 1
 
       local -r archive_format='zip'
       ;;
     *.tar.xz)
       # Ensure we have GNU tar
-      verify_exec "${UBIRD_TAR}" 'UBIRD_TAR' || exit 1
+      verify_exec "${UBIRD_TAR}" 'UBIRD_TAR' || return 1
 
       local -r archive_format='tar'
       ;;
     *)
       echo_red_text "ERROR: Unsupported archive format: '${output_archive}'!"
-      exit 1
+      return 1
       ;;
   esac
 
-  if [[ ! -d "${target_dir}" ]]; then
-    echo_red_text "ERROR: Target directory ('${target_dir}') does not exist! Aborting..."
-    exit 1
-  fi
+  # Ensure our target directory is valid
+  verify_dir "${target_dir}" || return 1
 
   # Check if the output archive already exists
   if [[ -f "${output_archive}" ]]; then
@@ -112,7 +98,7 @@ function create_archive() {
       echo_red_text "Removing '${output_archive}'..."
       "${UBIRD_RM}" -f "${output_archive}"
     else
-      exit 1
+      return 1
     fi
   fi
 
@@ -149,8 +135,8 @@ function create_archive() {
   # By default, we know the archive creation has not failed...
   local archive_failed=0
 
-  # Finally create our archive
-  echo_red_text "Creating archive: ${output_archive} from path: ${target_dir}..."
+  # Finally, create our archive
+  echo_red_text "Creating archive: '${output_archive}' from path: '${target_dir}'..."
   pushd "${target_dir}"
   if [[ "${archive_format}" == 'zip' ]]; then
     # shellcheck disable=SC2035
@@ -160,7 +146,7 @@ function create_archive() {
     "${UBIRD_TAR}" -cJv --exclude-vcs --group=0 --mode='go+u,go-w' --no-acls --no-selinux --no-xattrs --numeric-owner --owner=0 --pax-option='delete=atime,delete=ctime' --pax-option='exthdr.name=%d/PaxHeaders/%f' --restrict --sort=name --utc --clamp-mtime --mtime="${UBIRD_TIMESTAMP}" --exclude ".DS_Store" -f "${output_archive}" * || local archive_failed=1
   else
     echo_red_text "ERROR: Invalid archive format: '${archive_format}'!"
-    exit 1
+    return 1
   fi
   popd
 
@@ -187,37 +173,35 @@ function extract_archive() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please provide the path to an archive to extract!'
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${2+x}" ]]; then
     echo_red_text 'ERROR: Please provide the path that the archive should be extracted to!'
     print_usage
-    exit 1
+    return 1
   fi
 
   # Ensure we have basename
-  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || exit 1
+  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || return 1
 
   # Ensure we have cp
-  verify_exec "${UBIRD_CP}" 'UBIRD_CP' || exit 1
+  verify_exec "${UBIRD_CP}" 'UBIRD_CP' || return 1
 
   # Ensure we have ls
-  verify_exec "${UBIRD_LS}" 'UBIRD_LS' || exit 1
+  verify_exec "${UBIRD_LS}" 'UBIRD_LS' || return 1
 
   # Ensure we have mkdir
-  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || exit 1
+  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || return 1
 
   # Ensure we have rm
-  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || return 1
 
   local -r archive_path="$1"
   local -r target_path="$2"
 
-  if [[ ! -f "${archive_path}" ]]; then
-    echo_red_text "ERROR: Archive does not exist: '${archive_path}'!"
-    exit 1
-  fi
+  # Ensure the archive exists
+  verify_file "${archive_path}" || return 1
 
   # Set a temporary archive name
   local -r temp_archive_path_name=$("${UBIRD_BASENAME}" "${target_path}")
@@ -244,16 +228,16 @@ function extract_archive() {
       ;;
     *)
       echo_red_text "ERROR: Unsupported archive format: '${archive_path}'!"
-      exit 1
+      return 1
       ;;
   esac
 
   if [[ "${archive_format}" == 'zip' ]]; then
     # Ensure we have unzip
-    verify_exec "${UBIRD_UNZIP}" 'UBIRD_UNZIP' || exit 1
+    verify_exec "${UBIRD_UNZIP}" 'UBIRD_UNZIP' || return 1
   else
     # Ensure we have GNU tar
-    verify_exec "${UBIRD_TAR}" 'UBIRD_TAR' || exit 1
+    verify_exec "${UBIRD_TAR}" 'UBIRD_TAR' || return 1
   fi
 
   # Create temporary directory for extraction
@@ -274,7 +258,7 @@ function extract_archive() {
     "${UBIRD_TAR}" --zstd -xvf "${archive_path}" -C "${temp_archive_path}" || local extraction_failed=1
   else
     echo_red_text "ERROR: Invalid archive format: '${archive_format}'!"
-    exit 1
+    return 1
   fi
 
   local -r top_input_dir=$("${UBIRD_LS}" "${temp_archive_path}")

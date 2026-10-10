@@ -11,58 +11,34 @@
 
 # Scripts directory
 readonly UBIRD_SCRIPTS="${UBIRD_ROOT}/scripts"
-export UBIRD_SCRIPTS
 
 # Set our platform, OS, and architecture
 readonly UBIRD_ENV_HELPERS="${UBIRD_SCRIPTS}/env_helpers.sh"
-export UBIRD_ENV_HELPERS
-source "${UBIRD_ENV_HELPERS}"
+source "${UBIRD_ENV_HELPERS}" || return 1
 
-# Do not use the system PATH
-unset PATH
+# Set version info
+readonly UBIRD_VERSIONS="${UBIRD_SCRIPTS}/versions.sh"
+source "${UBIRD_VERSIONS}" || return 1
 
 # If variables are defined with a custom `env_override.sh` file (located at the root project directory), let's use those
 ## These need to be set first, to ensure that they don't interfere with certain variables
 readonly UBIRD_ENV_OVERRIDE="${UBIRD_ROOT}/env_override.sh"
 if [[ -f "${UBIRD_ENV_OVERRIDE}" ]]; then
-  source "${UBIRD_ENV_OVERRIDE}"
+  source "${UBIRD_ENV_OVERRIDE}" || return 1
 fi
 
 # Utilities
 readonly UBIRD_UTILS="${UBIRD_SCRIPTS}/utilities.sh"
-export UBIRD_UTILS
 
 # Download utilities
 readonly UBIRD_DOWNLOAD_UTILS="${UBIRD_SCRIPTS}/download-utilities.sh"
-export UBIRD_DOWNLOAD_UTILS
 
 # File utilities
 readonly UBIRD_FILE_UTILS="${UBIRD_SCRIPTS}/file-utilities.sh"
-export UBIRD_FILE_UTILS
 
-# Build directory
-readonly UBIRD_BUILD="${UBIRD_ROOT}/build"
-export UBIRD_BUILD
-
-# uBird PATH
-readonly UBIRD_PATH="${UBIRD_BUILD}/path"
-export UBIRD_PATH
-
-# Minimal uBird PATH for linting
-readonly UBIRD_LINT_PATH="${UBIRD_BUILD}/lint-path"
-export UBIRD_LINT_PATH
-
-# External sources directory
-readonly UBIRD_EXTERNAL="${UBIRD_ROOT}/external"
-export UBIRD_EXTERNAL
-
-# External downloads/resources directory
-readonly UBIRD_DOWNLOADS="${UBIRD_EXTERNAL}/downloads"
-export UBIRD_DOWNLOADS
-
-# Patches directory
-readonly UBIRD_PATCHES="${UBIRD_ROOT}/patches"
-export UBIRD_PATCHES
+# CI artifacts
+readonly UBIRD_ARTIFACTS="${UBIRD_ROOT}/artifacts"
+readonly UBIRD_LOG_ARTIFACTS="${UBIRD_ARTIFACTS}/logs"
 
 # Are we in a CI environment?
 readonly UBIRD_CI_DEFAULT=0
@@ -70,91 +46,90 @@ if [[ -z "${UBIRD_CI+x}" ]]; then
   UBIRD_CI="${UBIRD_CI_DEFAULT}"
 fi
 readonly UBIRD_CI
-export UBIRD_CI
 
 ## If so, set our CI environment variables
 readonly UBIRD_ENV_CI="${UBIRD_SCRIPTS}/env_ci.sh"
-if [[ "${UBIRD_CI}" == 1 ]]; then
-  source "${UBIRD_ENV_CI}"
+if [[ "${UBIRD_CI}" == 1 ]] || [[ "${UBIRD_CI}" == "" ]] || [[ "${UBIRD_CI}" == "null" ]]; then
+  source "${UBIRD_ENV_CI}" || return 1
 fi
 
-# Version info
-readonly UBIRD_VERSIONS="${UBIRD_SCRIPTS}/versions.sh"
-export UBIRD_VERSIONS
+# Build directory
+readonly UBIRD_BUILD="${UBIRD_ROOT}/build"
+
+# Temporary build directory
+readonly UBIRD_TEMP="${UBIRD_BUILD}/tmp"
+
+# uBird PATH
+readonly UBIRD_PATH="${UBIRD_BUILD}/path"
+
+# Minimal uBird PATH for linting
+readonly UBIRD_LINT_PATH="${UBIRD_BUILD}/lint-path"
+
+# External sources directory
+readonly UBIRD_EXTERNAL="${UBIRD_ROOT}/external"
+
+# External downloads/resources directory
+readonly UBIRD_DOWNLOADS="${UBIRD_EXTERNAL}/downloads"
+
+# Patches directory
+readonly UBIRD_PATCHES="${UBIRD_ROOT}/patches"
 
 # Outputs directory
 readonly UBIRD_OUTPUTS_DEFAULT="${UBIRD_ROOT}/outputs"
-if [[ -z "${UBIRD_OUTPUTS+x}" ]]; then
+if [[ -z "${UBIRD_OUTPUTS+x}" ]] || [[ "${UBIRD_OUTPUTS}" == "" ]] || [[ "${UBIRD_OUTPUTS}" == "null" ]]; then
   UBIRD_OUTPUTS="${UBIRD_OUTPUTS_DEFAULT}"
 fi
 readonly UBIRD_OUTPUTS
-export UBIRD_OUTPUTS
-
-# Whether we're targeting ATN or self-distribution
-## (The only difference ATM is that ATN builds do not specify an update URL)
-readonly UBIRD_ATN_DEFAULT=0
-if [[ -z "${UBIRD_ATN+x}" ]]; then
-  UBIRD_ATN="${UBIRD_ATN_DEFAULT}"
-fi
-readonly UBIRD_ATN
-export UBIRD_ATN
 
 # uBird add-on ID
 readonly UBIRD_ADDON_ID_DEFAULT='ubird-direct@celenity.dev'
-if [[ -z "${UBIRD_ADDON_ID+x}" ]]; then
+if [[ -z "${UBIRD_ADDON_ID+x}" ]] || [[ "${UBIRD_ADDON_ID}" == "" ]] || [[ "${UBIRD_ADDON_ID}" == "null" ]]; then
   UBIRD_ADDON_ID="${UBIRD_ADDON_ID_DEFAULT}"
 fi
 readonly UBIRD_ADDON_ID
-export UBIRD_ADDON_ID
 
 # uBird (ATN) add-on ID
 readonly UBIRD_ATN_ADDON_ID_DEFAULT='uBird@celenity.dev'
-if [[ -z "${UBIRD_ATN_ADDON_ID+x}" ]]; then
+if [[ -z "${UBIRD_ATN_ADDON_ID+x}" ]] || [[ "${UBIRD_ATN_ADDON_ID}" == "" ]] || [[ "${UBIRD_ATN_ADDON_ID}" == "null" ]]; then
   UBIRD_ATN_ADDON_ID="${UBIRD_ATN_ADDON_ID_DEFAULT}"
 fi
 readonly UBIRD_ATN_ADDON_ID
-export UBIRD_ATN_ADDON_ID
 
 # uBird update URL
 readonly UBIRD_UPDATE_URL_DEFAULT='https:/releases.celenity.dev/addons/updates.json'
-if [[ -z "${UBIRD_UPDATE_URL+x}" ]]; then
+if [[ -z "${UBIRD_UPDATE_URL+x}" ]] || [[ "${UBIRD_UPDATE_URL}" == "" ]] || [[ "${UBIRD_UPDATE_URL}" == "null" ]]; then
   # By default, use our update URL
   UBIRD_UPDATE_URL="${UBIRD_UPDATE_URL_DEFAULT}"
 fi
 readonly UBIRD_UPDATE_URL
-export UBIRD_UPDATE_URL
 
 # Should we create a log file for build.sh? (Default)
 readonly UBIRD_LOG_BUILD_DEFAULT=1
-if [[ -z "${UBIRD_LOG_BUILD+x}" ]]; then
+if [[ -z "${UBIRD_LOG_BUILD+x}" ]] || [[ "${UBIRD_LOG_BUILD}" == "" ]] || [[ "${UBIRD_LOG_BUILD}" == "null" ]]; then
   UBIRD_LOG_BUILD="${UBIRD_LOG_BUILD_DEFAULT}"
 fi
 readonly UBIRD_LOG_BUILD
-export UBIRD_LOG_BUILD
 
 # Should we create a log file for get_sources.sh? (Default)
 readonly UBIRD_LOG_SOURCES_DEFAULT=1
-if [[ -z "${UBIRD_LOG_SOURCES+x}" ]]; then
+if [[ -z "${UBIRD_LOG_SOURCES+x}" ]] || [[ "${UBIRD_LOG_SOURCES}" == "" ]] || [[ "${UBIRD_LOG_SOURCES}" == "null" ]]; then
   UBIRD_LOG_SOURCES="${UBIRD_LOG_SOURCES_DEFAULT}"
 fi
 readonly UBIRD_LOG_SOURCES
-export UBIRD_LOG_SOURCES
 
 # Directory where we should store log files (if logging is desired)
 readonly UBIRD_LOG_DIR_DEFAULT="${UBIRD_BUILD}/logs"
-if [[ -z "${UBIRD_LOG_DIR+x}" ]]; then
+if [[ -z "${UBIRD_LOG_DIR+x}" ]] || [[ "${UBIRD_LOG_DIR}" == "" ]] || [[ "${UBIRD_LOG_DIR}" == "null" ]]; then
   UBIRD_LOG_DIR="${UBIRD_LOG_DIR_DEFAULT}"
 fi
 readonly UBIRD_LOG_DIR
-export UBIRD_LOG_DIR
 
 # Whether we should display verbose build output
 readonly UBIRD_VERBOSE_DEFAULT=0
-if [[ -z "${UBIRD_VERBOSE+x}" ]]; then
+if [[ -z "${UBIRD_VERBOSE+x}" ]] || [[ "${UBIRD_VERBOSE}" == "" ]] || [[ "${UBIRD_VERBOSE}" == "null" ]]; then
   UBIRD_VERBOSE="${UBIRD_VERBOSE_DEFAULT}"
 fi
 readonly UBIRD_VERBOSE
-export UBIRD_VERBOSE
 
 # basename
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -162,35 +137,38 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_BASENAME_DEFAULT='/bin/basename'
 fi
-if [[ -z "${UBIRD_BASENAME+x}" ]]; then
+if [[ -z "${UBIRD_BASENAME+x}" ]] || [[ "${UBIRD_BASENAME}" == "" ]] || [[ "${UBIRD_BASENAME}" == "null" ]]; then
   UBIRD_BASENAME="${UBIRD_BASENAME_DEFAULT}"
 fi
 readonly UBIRD_BASENAME
-export UBIRD_BASENAME
+
+# bash
+readonly UBIRD_BASH_DEFAULT='/bin/bash'
+if [[ -z "${UBIRD_BASH+x}" ]] || [[ "${UBIRD_BASH}" == "" ]] || [[ "${UBIRD_BASH}" == "null" ]]; then
+  UBIRD_BASH="${UBIRD_BASH_DEFAULT}"
+fi
+readonly UBIRD_BASH
 
 # cat
 readonly UBIRD_CAT_DEFAULT='/bin/cat'
-if [[ -z "${UBIRD_CAT+x}" ]]; then
+if [[ -z "${UBIRD_CAT+x}" ]] || [[ "${UBIRD_CAT}" == "" ]] || [[ "${UBIRD_CAT}" == "null" ]]; then
   UBIRD_CAT="${UBIRD_CAT_DEFAULT}"
 fi
 readonly UBIRD_CAT
-export UBIRD_CAT
 
 # chmod
 readonly UBIRD_CHMOD_DEFAULT='/bin/chmod'
-if [[ -z "${UBIRD_CHMOD+x}" ]]; then
+if [[ -z "${UBIRD_CHMOD+x}" ]] || [[ "${UBIRD_CHMOD}" == "" ]] || [[ "${UBIRD_CHMOD}" == "null" ]]; then
   UBIRD_CHMOD="${UBIRD_CHMOD_DEFAULT}"
 fi
 readonly UBIRD_CHMOD
-export UBIRD_CHMOD
 
 # cp
 readonly UBIRD_CP_DEFAULT='/bin/cp'
-if [[ -z "${UBIRD_CP+x}" ]]; then
+if [[ -z "${UBIRD_CP+x}" ]] || [[ "${UBIRD_CP}" == "" ]] || [[ "${UBIRD_CP}" == "null" ]]; then
   UBIRD_CP="${UBIRD_CP_DEFAULT}"
 fi
 readonly UBIRD_CP
-export UBIRD_CP
 
 # curl
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -198,11 +176,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_CURL_DEFAULT='/bin/curl'
 fi
-if [[ -z "${UBIRD_CURL+x}" ]]; then
+if [[ -z "${UBIRD_CURL+x}" ]] || [[ "${UBIRD_CURL}" == "" ]] || [[ "${UBIRD_CURL}" == "null" ]]; then
   UBIRD_CURL="${UBIRD_CURL_DEFAULT}"
 fi
 readonly UBIRD_CURL
-export UBIRD_CURL
 
 # dirname
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -210,11 +187,28 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_DIRNAME_DEFAULT='/bin/dirname'
 fi
-if [[ -z "${UBIRD_DIRNAME+x}" ]]; then
+if [[ -z "${UBIRD_DIRNAME+x}" ]] || [[ "${UBIRD_DIRNAME}" == "" ]] || [[ "${UBIRD_DIRNAME}" == "null" ]]; then
   UBIRD_DIRNAME="${UBIRD_DIRNAME_DEFAULT}"
 fi
 readonly UBIRD_DIRNAME
-export UBIRD_DIRNAME
+
+# dot_clean
+readonly UBIRD_DOT_CLEAN_DEFAULT='/usr/sbin/dot_clean'
+if [[ -z "${UBIRD_DOT_CLEAN+x}" ]] || [[ "${UBIRD_DOT_CLEAN}" == "" ]] || [[ "${UBIRD_DOT_CLEAN}" == "null" ]]; then
+  UBIRD_DOT_CLEAN="${UBIRD_DOT_CLEAN_DEFAULT}"
+fi
+readonly UBIRD_DOT_CLEAN
+
+# find
+if [[ "${UBIRD_OS}" == 'osx' ]]; then
+  readonly UBIRD_FIND_DEFAULT='/usr/bin/find'
+else
+  readonly UBIRD_FIND_DEFAULT='/bin/find'
+fi
+if [[ -z "${UBIRD_FIND+x}" ]] || [[ "${UBIRD_FIND}" == "" ]] || [[ "${UBIRD_FIND}" == "null" ]]; then
+  UBIRD_FIND="${UBIRD_FIND_DEFAULT}"
+fi
+readonly UBIRD_FIND
 
 # git
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -222,11 +216,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_GIT_DEFAULT='/bin/git'
 fi
-if [[ -z "${UBIRD_GIT+x}" ]]; then
+if [[ -z "${UBIRD_GIT+x}" ]] || [[ "${UBIRD_GIT}" == "" ]] || [[ "${UBIRD_GIT}" == "null" ]]; then
   UBIRD_GIT="${UBIRD_GIT_DEFAULT}"
 fi
 readonly UBIRD_GIT
-export UBIRD_GIT
 
 # GNU awk
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -234,11 +227,21 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_AWK_DEFAULT='/bin/awk'
 fi
-if [[ -z "${UBIRD_AWK+x}" ]]; then
+if [[ -z "${UBIRD_AWK+x}" ]] || [[ "${UBIRD_AWK}" == "" ]] || [[ "${UBIRD_AWK}" == "null" ]]; then
   UBIRD_AWK="${UBIRD_AWK_DEFAULT}"
 fi
 readonly UBIRD_AWK
-export UBIRD_AWK
+
+# GNU date
+if [[ "${UBIRD_OS}" == 'osx' ]]; then
+  readonly UBIRD_DATE_DEFAULT='/opt/homebrew/bin/gdate'
+else
+  readonly UBIRD_DATE_DEFAULT='/bin/date'
+fi
+if [[ -z "${UBIRD_DATE+x}" ]] || [[ "${UBIRD_DATE}" == "" ]] || [[ "${UBIRD_DATE}" == "null" ]]; then
+  UBIRD_DATE="${UBIRD_DATE_DEFAULT}"
+fi
+readonly UBIRD_DATE
 
 # GNU patch
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -246,11 +249,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_PATCH_DEFAULT='/usr/bin/patch'
 fi
-if [[ -z "${UBIRD_PATCH+x}" ]]; then
+if [[ -z "${UBIRD_PATCH+x}" ]] || [[ "${UBIRD_PATCH}" == "" ]] || [[ "${UBIRD_PATCH}" == "null" ]]; then
   UBIRD_PATCH="${UBIRD_PATCH_DEFAULT}"
 fi
 readonly UBIRD_PATCH
-export UBIRD_PATCH
 
 # GNU sed
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -258,11 +260,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_SED_DEFAULT='/bin/sed'
 fi
-if [[ -z "${UBIRD_SED+x}" ]]; then
+if [[ -z "${UBIRD_SED+x}" ]] || [[ "${UBIRD_SED}" == "" ]] || [[ "${UBIRD_SED}" == "null" ]]; then
   UBIRD_SED="${UBIRD_SED_DEFAULT}"
 fi
 readonly UBIRD_SED
-export UBIRD_SED
 
 # GNU tar
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -270,11 +271,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_TAR_DEFAULT='/bin/tar'
 fi
-if [[ -z "${UBIRD_TAR+x}" ]]; then
+if [[ -z "${UBIRD_TAR+x}" ]] || [[ "${UBIRD_TAR}" == "" ]] || [[ "${UBIRD_TAR}" == "null" ]]; then
   UBIRD_TAR="${UBIRD_TAR_DEFAULT}"
 fi
 readonly UBIRD_TAR
-export UBIRD_TAR
 
 # grep
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -282,11 +282,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_GREP_DEFAULT='/bin/grep'
 fi
-if [[ -z "${UBIRD_GREP+x}" ]]; then
+if [[ -z "${UBIRD_GREP+x}" ]] || [[ "${UBIRD_GREP}" == "" ]] || [[ "${UBIRD_GREP}" == "null" ]]; then
   UBIRD_GREP="${UBIRD_GREP_DEFAULT}"
 fi
 readonly UBIRD_GREP
-export UBIRD_GREP
 
 # gzip
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -294,27 +293,35 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_GZIP_DEFAULT='/bin/gzip'
 fi
-if [[ -z "${UBIRD_GZIP+x}" ]]; then
+if [[ -z "${UBIRD_GZIP+x}" ]] || [[ "${UBIRD_GZIP}" == "" ]] || [[ "${UBIRD_GZIP}" == "null" ]]; then
   UBIRD_GZIP="${UBIRD_GZIP_DEFAULT}"
 fi
 readonly UBIRD_GZIP
-export UBIRD_GZIP
+
+# head
+if [[ "${UBIRD_OS}" == 'osx' ]]; then
+  readonly UBIRD_HEAD_DEFAULT='/usr/bin/head'
+else
+  readonly UBIRD_HEAD_DEFAULT='/bin/head'
+fi
+if [[ -z "${UBIRD_HEAD+x}" ]] || [[ "${UBIRD_HEAD}" == "" ]] || [[ "${UBIRD_HEAD}" == "null" ]]; then
+  UBIRD_HEAD="${UBIRD_HEAD_DEFAULT}"
+fi
+readonly UBIRD_HEAD
 
 # ln
 readonly UBIRD_LN_DEFAULT='/bin/ln'
-if [[ -z "${UBIRD_LN+x}" ]]; then
+if [[ -z "${UBIRD_LN+x}" ]] || [[ "${UBIRD_LN}" == "" ]] || [[ "${UBIRD_LN}" == "null" ]]; then
   UBIRD_LN="${UBIRD_LN_DEFAULT}"
 fi
 readonly UBIRD_LN
-export UBIRD_LN
 
 # ls
 readonly UBIRD_LS_DEFAULT='/bin/ls'
-if [[ -z "${UBIRD_LS+x}" ]]; then
+if [[ -z "${UBIRD_LS+x}" ]] || [[ "${UBIRD_LS}" == "" ]] || [[ "${UBIRD_LS}" == "null" ]]; then
   UBIRD_LS="${UBIRD_LS_DEFAULT}"
 fi
 readonly UBIRD_LS
-export UBIRD_LS
 
 # md5sum
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -322,19 +329,17 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_MD5SUM_DEFAULT='/bin/md5sum'
 fi
-if [[ -z "${UBIRD_MD5SUM+x}" ]]; then
+if [[ -z "${UBIRD_MD5SUM+x}" ]] || [[ "${UBIRD_MD5SUM}" == "" ]] || [[ "${UBIRD_MD5SUM}" == "null" ]]; then
   UBIRD_MD5SUM="${UBIRD_MD5SUM_DEFAULT}"
 fi
 readonly UBIRD_MD5SUM
-export UBIRD_MD5SUM
 
 # mkdir
 readonly UBIRD_MKDIR_DEFAULT='/bin/mkdir'
-if [[ -z "${UBIRD_MKDIR+x}" ]]; then
+if [[ -z "${UBIRD_MKDIR+x}" ]] || [[ "${UBIRD_MKDIR}" == "" ]] || [[ "${UBIRD_MKDIR}" == "null" ]]; then
   UBIRD_MKDIR="${UBIRD_MKDIR_DEFAULT}"
 fi
 readonly UBIRD_MKDIR
-export UBIRD_MKDIR
 
 # mktemp
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -342,27 +347,31 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_MKTEMP_DEFAULT='/bin/mktemp'
 fi
-if [[ -z "${UBIRD_MKTEMP+x}" ]]; then
+if [[ -z "${UBIRD_MKTEMP+x}" ]] || [[ "${UBIRD_MKTEMP}" == "" ]] || [[ "${UBIRD_MKTEMP}" == "null" ]]; then
   UBIRD_MKTEMP="${UBIRD_MKTEMP_DEFAULT}"
 fi
 readonly UBIRD_MKTEMP
-export UBIRD_MKTEMP
 
 # mv
 readonly UBIRD_MV_DEFAULT='/bin/mv'
-if [[ -z "${UBIRD_MV+x}" ]]; then
+if [[ -z "${UBIRD_MV+x}" ]] || [[ "${UBIRD_MV}" == "" ]] || [[ "${UBIRD_MV}" == "null" ]]; then
   UBIRD_MV="${UBIRD_MV_DEFAULT}"
 fi
 readonly UBIRD_MV
-export UBIRD_MV
 
 # rm
 readonly UBIRD_RM_DEFAULT='/bin/rm'
-if [[ -z "${UBIRD_RM+x}" ]]; then
+if [[ -z "${UBIRD_RM+x}" ]] || [[ "${UBIRD_RM}" == "" ]] || [[ "${UBIRD_RM}" == "null" ]]; then
   UBIRD_RM="${UBIRD_RM_DEFAULT}"
 fi
 readonly UBIRD_RM
-export UBIRD_RM
+
+# sh
+readonly UBIRD_SH_DEFAULT='/bin/sh'
+if [[ -z "${UBIRD_SH+x}" ]] || [[ "${UBIRD_SH}" == "" ]] || [[ "${UBIRD_SH}" == "null" ]]; then
+  UBIRD_SH="${UBIRD_SH_DEFAULT}"
+fi
+readonly UBIRD_SH
 
 # shasum
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -372,31 +381,26 @@ elif [[ "${UBIRD_OS}" == 'secureblue' ]]; then
 else
   readonly UBIRD_SHASUM_DEFAULT='/bin/shasum'
 fi
-if [[ -z "${UBIRD_SHASUM+x}" ]]; then
+if [[ -z "${UBIRD_SHASUM+x}" ]] || [[ "${UBIRD_SHASUM}" == "" ]] || [[ "${UBIRD_SHASUM}" == "null" ]]; then
   UBIRD_SHASUM="${UBIRD_SHASUM_DEFAULT}"
 fi
 readonly UBIRD_SHASUM
-export UBIRD_SHASUM
 
 # -shellcheck
 readonly UBIRD_SHELLCHECK_DIR_DEFAULT="${UBIRD_EXTERNAL}/shellcheck"
-if [[ -z "${UBIRD_SHELLCHECK_DIR+x}" ]]; then
+if [[ -z "${UBIRD_SHELLCHECK_DIR+x}" ]] || [[ "${UBIRD_SHELLCHECK_DIR}" == "" ]] || [[ "${UBIRD_SHELLCHECK_DIR}" == "null" ]]; then
   UBIRD_SHELLCHECK_DIR="${UBIRD_SHELLCHECK_DIR_DEFAULT}"
 fi
 readonly UBIRD_SHELLCHECK_DIR
 readonly UBIRD_SHELLCHECK="${UBIRD_SHELLCHECK_DIR}/shellcheck"
-export UBIRD_SHELLCHECK
-export UBIRD_SHELLCHECK_DIR
 
 # shfmt
 readonly UBIRD_SHFMT_DIR_DEFAULT="${UBIRD_EXTERNAL}/shfmt"
-if [[ -z "${UBIRD_SHFMT_DIR+x}" ]]; then
+if [[ -z "${UBIRD_SHFMT_DIR+x}" ]] || [[ "${UBIRD_SHFMT_DIR}" == "" ]] || [[ "${UBIRD_SHFMT_DIR}" == "null" ]]; then
   UBIRD_SHFMT_DIR="${UBIRD_SHFMT_DIR_DEFAULT}"
 fi
 readonly UBIRD_SHFMT_DIR
 readonly UBIRD_SHFMT="${UBIRD_SHFMT_DIR}/shfmt"
-export UBIRD_SHFMT
-export UBIRD_SHFMT_DIR
 
 # tee
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -404,11 +408,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_TEE_DEFAULT='/bin/tee'
 fi
-if [[ -z "${UBIRD_TEE+x}" ]]; then
+if [[ -z "${UBIRD_TEE+x}" ]] || [[ "${UBIRD_TEE}" == "" ]] || [[ "${UBIRD_TEE}" == "null" ]]; then
   UBIRD_TEE="${UBIRD_TEE_DEFAULT}"
 fi
 readonly UBIRD_TEE
-export UBIRD_TEE
 
 # touch
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -416,11 +419,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_TOUCH_DEFAULT='/bin/touch'
 fi
-if [[ -z "${UBIRD_TOUCH+x}" ]]; then
+if [[ -z "${UBIRD_TOUCH+x}" ]] || [[ "${UBIRD_TOUCH}" == "" ]] || [[ "${UBIRD_TOUCH}" == "null" ]]; then
   UBIRD_TOUCH="${UBIRD_TOUCH_DEFAULT}"
 fi
 readonly UBIRD_TOUCH
-export UBIRD_TOUCH
 
 # tr
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -428,11 +430,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_TR_DEFAULT='/bin/tr'
 fi
-if [[ -z "${UBIRD_TR+x}" ]]; then
+if [[ -z "${UBIRD_TR+x}" ]] || [[ "${UBIRD_TR}" == "" ]] || [[ "${UBIRD_TR}" == "null" ]]; then
   UBIRD_TR="${UBIRD_TR_DEFAULT}"
 fi
 readonly UBIRD_TR
-export UBIRD_TR
 
 # uname
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -440,11 +441,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_UNAME_DEFAULT='/bin/uname'
 fi
-if [[ -z "${UBIRD_UNAME+x}" ]]; then
+if [[ -z "${UBIRD_UNAME+x}" ]] || [[ "${UBIRD_UNAME}" == "" ]] || [[ "${UBIRD_UNAME}" == "null" ]]; then
   UBIRD_UNAME="${UBIRD_UNAME_DEFAULT}"
 fi
 readonly UBIRD_UNAME
-export UBIRD_UNAME
 
 # unzip
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -452,11 +452,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_UNZIP_DEFAULT='/bin/unzip'
 fi
-if [[ -z "${UBIRD_UNZIP+x}" ]]; then
+if [[ -z "${UBIRD_UNZIP+x}" ]] || [[ "${UBIRD_UNZIP}" == "" ]] || [[ "${UBIRD_UNZIP}" == "null" ]]; then
   UBIRD_UNZIP="${UBIRD_UNZIP_DEFAULT}"
 fi
 readonly UBIRD_UNZIP
-export UBIRD_UNZIP
 
 # wc
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -464,11 +463,21 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_WC_DEFAULT='/bin/wc'
 fi
-if [[ -z "${UBIRD_WC+x}" ]]; then
+if [[ -z "${UBIRD_WC+x}" ]] || [[ "${UBIRD_WC}" == "" ]] || [[ "${UBIRD_WC}" == "null" ]]; then
   UBIRD_WC="${UBIRD_WC_DEFAULT}"
 fi
 readonly UBIRD_WC
-export UBIRD_WC
+
+# xargs
+if [[ "${UBIRD_OS}" == 'osx' ]]; then
+  readonly UBIRD_XARGS_DEFAULT='/usr/bin/xargs'
+else
+  readonly UBIRD_XARGS_DEFAULT='/bin/xargs'
+fi
+if [[ -z "${UBIRD_XARGS+x}" ]] || [[ "${UBIRD_XARGS}" == "" ]] || [[ "${UBIRD_XARGS}" == "null" ]]; then
+  UBIRD_XARGS="${UBIRD_XARGS_DEFAULT}"
+fi
+readonly UBIRD_XARGS
 
 # xz
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -476,11 +485,10 @@ if [[ "${UBIRD_OS}" == 'osx' ]]; then
 else
   readonly UBIRD_XZ_DEFAULT='/bin/xz'
 fi
-if [[ -z "${UBIRD_XZ+x}" ]]; then
+if [[ -z "${UBIRD_XZ+x}" ]] || [[ "${UBIRD_XZ}" == "" ]] || [[ "${UBIRD_XZ}" == "null" ]]; then
   UBIRD_XZ="${UBIRD_XZ_DEFAULT}"
 fi
 readonly UBIRD_XZ
-export UBIRD_XZ
 
 # yq
 if [[ "${UBIRD_OS}" == 'osx' ]]; then
@@ -490,109 +498,95 @@ elif [[ "${UBIRD_OS}" == 'secureblue' ]]; then
 else
   readonly UBIRD_YQ_DEFAULT='/bin/yq'
 fi
-if [[ -z "${UBIRD_YQ+x}" ]]; then
+if [[ -z "${UBIRD_YQ+x}" ]] || [[ "${UBIRD_YQ}" == "" ]] || [[ "${UBIRD_YQ}" == "null" ]]; then
   UBIRD_YQ="${UBIRD_YQ_DEFAULT}"
 fi
 readonly UBIRD_YQ
-export UBIRD_YQ
 
 # zip
 readonly UBIRD_ZIP_DEFAULT='/usr/bin/zip'
-if [[ -z "${UBIRD_ZIP+x}" ]]; then
+if [[ -z "${UBIRD_ZIP+x}" ]] || [[ "${UBIRD_ZIP}" == "" ]] || [[ "${UBIRD_ZIP}" == "null" ]]; then
   UBIRD_ZIP="${UBIRD_ZIP_DEFAULT}"
 fi
 readonly UBIRD_ZIP
-export UBIRD_ZIP
 
 # Python
 readonly UBIRD_PYTHON_DIR_DEFAULT="${UBIRD_EXTERNAL}/python"
-if [[ -z "${UBIRD_PYTHON_DIR+x}" ]]; then
+if [[ -z "${UBIRD_PYTHON_DIR+x}" ]] || [[ "${UBIRD_PYTHON_DIR}" == "" ]] || [[ "${UBIRD_PYTHON_DIR}" == "null" ]]; then
   UBIRD_PYTHON_DIR="${UBIRD_PYTHON_DIR_DEFAULT}"
 fi
 readonly UBIRD_PYTHON_DIR
-export UBIRD_PYTHON_DIR
 
 # Python (uv) environment
 readonly UBIRD_PYENV_DIR_DEFAULT="${UBIRD_BUILD}/pyenv"
-if [[ -z "${UBIRD_PYENV_DIR+x}" ]]; then
+if [[ -z "${UBIRD_PYENV_DIR+x}" ]] || [[ "${UBIRD_PYENV_DIR}" == "" ]] || [[ "${UBIRD_PYENV_DIR}" == "null" ]]; then
   UBIRD_PYENV_DIR="${UBIRD_PYENV_DIR_DEFAULT}"
 fi
 readonly UBIRD_PYENV_DIR
 readonly UBIRD_PYENV="${UBIRD_PYENV_DIR}/bin/activate"
-export UBIRD_PYENV
-export UBIRD_PYENV_DIR
 
 readonly UBIRD_PYTHON_DEFAULT="${UBIRD_PYENV_DIR}/bin/python"
-if [[ -z "${UBIRD_PYTHON+x}" ]]; then
+if [[ -z "${UBIRD_PYTHON+x}" ]] || [[ "${UBIRD_PYTHON}" == "" ]] || [[ "${UBIRD_PYTHON}" == "null" ]]; then
   UBIRD_PYTHON="${UBIRD_PYTHON_DEFAULT}"
 fi
 readonly UBIRD_PYTHON
 
 # uv
 readonly UBIRD_UV_DIR_DEFAULT="${UBIRD_EXTERNAL}/uv"
-if [[ -z "${UBIRD_UV_DIR+x}" ]]; then
+if [[ -z "${UBIRD_UV_DIR+x}" ]] || [[ "${UBIRD_UV_DIR}" == "" ]] || [[ "${UBIRD_UV_DIR}" == "null" ]]; then
   UBIRD_UV_DIR="${UBIRD_UV_DIR_DEFAULT}"
 fi
 readonly UBIRD_UV_DIR
 readonly UBIRD_UV="${UBIRD_UV_DIR}/uv"
-export UBIRD_UV
-export UBIRD_UV_DIR
 
 # uv (local directory)
 readonly UBIRD_UV_LOCAL_DEFAULT="${UBIRD_BUILD}/uv"
-if [[ -z "${UBIRD_UV_LOCAL+x}" ]]; then
+if [[ -z "${UBIRD_UV_LOCAL+x}" ]] || [[ "${UBIRD_UV_LOCAL}" == "" ]] || [[ "${UBIRD_UV_LOCAL}" == "null" ]]; then
   UBIRD_UV_LOCAL="${UBIRD_UV_LOCAL_DEFAULT}"
 fi
 readonly UBIRD_UV_LOCAL
-export UBIRD_UV_LOCAL
 
 # uv cache
 readonly UBIRD_UV_CACHE_DEFAULT="${UBIRD_UV_LOCAL}/cache"
-if [[ -z "${UBIRD_UV_CACHE+x}" ]]; then
+if [[ -z "${UBIRD_UV_CACHE+x}" ]] || [[ "${UBIRD_UV_CACHE}" == "" ]] || [[ "${UBIRD_UV_CACHE}" == "null" ]]; then
   UBIRD_UV_CACHE="${UBIRD_UV_CACHE_DEFAULT}"
 fi
 readonly UBIRD_UV_CACHE
-export UBIRD_UV_CACHE
 
 # uv Python directory
 readonly UBIRD_UV_PYTHON_DEFAULT="${UBIRD_UV_LOCAL}/python"
-if [[ -z "${UBIRD_UV_PYTHON+x}" ]]; then
+if [[ -z "${UBIRD_UV_PYTHON+x}" ]] || [[ "${UBIRD_UV_PYTHON}" == "" ]] || [[ "${UBIRD_UV_PYTHON}" == "null" ]]; then
   UBIRD_UV_PYTHON="${UBIRD_UV_PYTHON_DEFAULT}"
 fi
 readonly UBIRD_UV_PYTHON
-export UBIRD_UV_PYTHON
 
 # uv tools
 readonly UBIRD_UV_TOOLS_DEFAULT="${UBIRD_UV_LOCAL}/tools"
-if [[ -z "${UBIRD_UV_TOOLS+x}" ]]; then
+if [[ -z "${UBIRD_UV_TOOLS+x}" ]] || [[ "${UBIRD_UV_TOOLS}" == "" ]] || [[ "${UBIRD_UV_TOOLS}" == "null" ]]; then
   UBIRD_UV_TOOLS="${UBIRD_UV_TOOLS_DEFAULT}"
 fi
 readonly UBIRD_UV_TOOLS
-export UBIRD_UV_TOOLS
 
 ## uAssets (main)
 readonly UBIRD_UASSETS_MAIN_DEFAULT="${UBIRD_EXTERNAL}/uassets-main"
-if [[ -z "${UBIRD_UASSETS_MAIN+x}" ]]; then
+if [[ -z "${UBIRD_UASSETS_MAIN+x}" ]] || [[ "${UBIRD_UASSETS_MAIN}" == "" ]] || [[ "${UBIRD_UASSETS_MAIN}" == "null" ]]; then
   UBIRD_UASSETS_MAIN="${UBIRD_UASSETS_MAIN_DEFAULT}"
 fi
 readonly UBIRD_UASSETS_MAIN
-export UBIRD_UASSETS_MAIN
 
 ## uAssets (prod)
 readonly UBIRD_UASSETS_PROD_DEFAULT="${UBIRD_EXTERNAL}/uassets-prod"
-if [[ -z "${UBIRD_UASSETS_PROD+x}" ]]; then
+if [[ -z "${UBIRD_UASSETS_PROD+x}" ]] || [[ "${UBIRD_UASSETS_PROD}" == "" ]] || [[ "${UBIRD_UASSETS_PROD}" == "null" ]]; then
   UBIRD_UASSETS_PROD="${UBIRD_UASSETS_PROD_DEFAULT}"
 fi
 readonly UBIRD_UASSETS_PROD
-export UBIRD_UASSETS_PROD
 
 # uBlock Origin
 readonly UBIRD_UBO_DEFAULT="${UBIRD_EXTERNAL}/ublock"
-if [[ -z "${UBIRD_UBO+x}" ]]; then
+if [[ -z "${UBIRD_UBO+x}" ]] || [[ "${UBIRD_UBO}" == "" ]] || [[ "${UBIRD_UBO}" == "null" ]]; then
   UBIRD_UBO="${UBIRD_UBO_DEFAULT}"
 fi
 readonly UBIRD_UBO
-export UBIRD_UBO
 
 # Cipher suites
 ## (These enforce strong cipher suites - see ex. https://browserleaks.com/tls)
@@ -600,39 +594,35 @@ export UBIRD_UBO
 ## For TLS 1.3 connections
 ### https://curl.se/docs/manpage.html#--tls13-ciphers
 readonly UBIRD_TLS13_CIPHERS_DEFAULT='TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_256_GCM_SHA384'
-if [[ -z "${UBIRD_TLS13_CIPHERS+x}" ]]; then
+if [[ -z "${UBIRD_TLS13_CIPHERS+x}" ]] || [[ "${UBIRD_TLS13_CIPHERS}" == "" ]] || [[ "${UBIRD_TLS13_CIPHERS}" == "null" ]]; then
   UBIRD_TLS13_CIPHERS="${UBIRD_TLS13_CIPHERS_DEFAULT}"
 fi
 readonly UBIRD_TLS13_CIPHERS
-export UBIRD_TLS13_CIPHERS
 
 ## For non-TLS 1.3 connections
 ### https://curl.se/docs/manpage.html#--ciphers
 readonly UBIRD_NONTLS13_CIPHERS_DEFAULT='ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384'
-if [[ -z "${UBIRD_NONTLS13_CIPHERS+x}" ]]; then
+if [[ -z "${UBIRD_NONTLS13_CIPHERS+x}" ]] || [[ "${UBIRD_NONTLS13_CIPHERS}" == "" ]] || [[ "${UBIRD_NONTLS13_CIPHERS}" == "null" ]]; then
   UBIRD_NONTLS13_CIPHERS="${UBIRD_NONTLS13_CIPHERS_DEFAULT}"
 fi
 readonly UBIRD_NONTLS13_CIPHERS
-export UBIRD_NONTLS13_CIPHERS
 
 # This includes all ciphers (combining UBIRD_TLS13_CIPHERS + UBIRD_NONTLS13_CIPHERS)
 ## Useful because many programs do not require specifying a separate set of ciphers for TLS 1.3 like curl does
 readonly UBIRD_CIPHERS="${UBIRD_TLS13_CIPHERS}:${UBIRD_NONTLS13_CIPHERS}"
-export UBIRD_CIPHERS
 
 # If curl flags are added, this determines whether they should be appended to our default flags (default),
 ## or if they should override them entirely
 readonly UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT=0
-if [[ -z "${UBIRD_CURL_FLAGS_OVERRIDE+x}" ]]; then
+if [[ -z "${UBIRD_CURL_FLAGS_OVERRIDE+x}" ]] || [[ "${UBIRD_CURL_FLAGS_OVERRIDE}" == "" ]] || [[ "${UBIRD_CURL_FLAGS_OVERRIDE}" == "null" ]]; then
   UBIRD_CURL_FLAGS_OVERRIDE="${UBIRD_CURL_FLAGS_OVERRIDE_DEFAULT}"
 fi
 readonly UBIRD_CURL_FLAGS_OVERRIDE
-export UBIRD_CURL_FLAGS_OVERRIDE
 
 # curl flags
 # shellcheck disable=SC2089
 readonly UBIRD_CURL_FLAGS_DEFAULT="--disable --no-netrc --ciphers ${UBIRD_NONTLS13_CIPHERS} --clobber --create-dirs --delegation none --disallow-username-in-url --doh-cert-status --fail --fail-early --junk-session-cookies --no-basic --no-ca-native --no-digest --no-doh-insecure --no-http0.9 --no-insecure --no-negotiate --no-ntlm --no-proxy-basic --no-proxy-ca-native --no-proxy-digest --no-proxy-insecure --no-proxy-ssl-auto-client-cert --no-sessionid --no-ssl-auto-client-cert --no-ssl-no-revoke --no-ssl-revoke-best-effort --no-xattr --parallel --post301 --post302 --post303 --progress-meter --proto -all,https --proto-default https --proto-redir -all,https --proxy-ciphers ${UBIRD_NONTLS13_CIPHERS} --proxy-tls13-ciphers ${UBIRD_TLS13_CIPHERS} --referer '' --remove-on-error --retry 5 --retry-all-errors --retry-connrefused --show-error --tls13-ciphers ${UBIRD_TLS13_CIPHERS} --tlsv1.2 --trace-time --user-agent '' --verbose"
-if [[ -z "${UBIRD_CURL_FLAGS+x}" ]]; then
+if [[ -z "${UBIRD_CURL_FLAGS+x}" ]] || [[ "${UBIRD_CURL_FLAGS}" == "" ]] || [[ "${UBIRD_CURL_FLAGS}" == "null" ]]; then
   UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT}"
 elif [[ "${UBIRD_CURL_FLAGS_OVERRIDE}" == 1 ]]; then
   UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS}"
@@ -640,13 +630,10 @@ else
   UBIRD_CURL_FLAGS="${UBIRD_CURL_FLAGS_DEFAULT} ${UBIRD_CURL_FLAGS}"
 fi
 readonly UBIRD_CURL_FLAG
-# shellcheck disable=SC2090
-export UBIRD_CURL_FLAGS
 
 # Set our external environment variables
 readonly UBIRD_ENV_EXTERNAL="${UBIRD_SCRIPTS}/env_external.sh"
-source "${UBIRD_ENV_EXTERNAL}"
+source "${UBIRD_ENV_EXTERNAL}" || return 1
 
 # We've now set our environment variables...
 readonly UBIRD_SET_ENVS=1
-export UBIRD_SET_ENVS

@@ -2,31 +2,34 @@
 
 set -euo pipefail
 
-# Set-up our environment
-source $(dirname $0)/env.sh || exit 1
-
-# Include utilities
-source "${UBIRD_UTILS}" || exit 1
-
 # Set verbosity
 set_verbosity
 
 # Include download utilities
-source "${UBIRD_DOWNLOAD_UTILS}" || exit 1
+verify_file_with_env "${UBIRD_DOWNLOAD_UTILS}" 'UBIRD_DOWNLOAD_UTILS' || return 1
+source "${UBIRD_DOWNLOAD_UTILS}" || return 1
 
 # Include file utilities
-source "${UBIRD_FILE_UTILS}" || exit 1
+verify_file_with_env "${UBIRD_FILE_UTILS}" 'UBIRD_FILE_UTILS' || return 1
+source "${UBIRD_FILE_UTILS}" || return 1
 
 if [[ -z "${UBIRD_FROM_SOURCES+x}" ]]; then
   echo_red_text "ERROR: Do not call 'get_sources-ubird.sh' directly! Instead, use 'get_sources.sh'." >&1
-  exit 1
+  return 1
 fi
 
 # Ensure we have rm
-verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+verify_exec "${UBIRD_RM}" 'UBIRD_RM' || return 1
 
-readonly target="$1"
-readonly mode="$2"
+verify_env "${source_target}" 'source_target' || {
+  echo_red_text "ERROR: Missing target!"
+  return 1
+}
+
+verify_env "${mode}" 'mode' || {
+  echo_red_text "ERROR: Missing mode!"
+  return 1
+}
 
 # Set-up target parameters
 UBIRD_GET_SOURCE_PYTHON=0
@@ -37,28 +40,28 @@ UBIRD_GET_SOURCE_UASSETS_PROD=0
 UBIRD_GET_SOURCE_UBLOCK=0
 UBIRD_GET_SOURCE_UV=0
 
-if [[ "${target}" == 'python' ]]; then
+if [[ "${source_target}" == 'python' ]]; then
   # Get Python
   UBIRD_GET_SOURCE_PYTHON=1
-elif [[ "${target}" == 'shellcheck' ]]; then
+elif [[ "${source_target}" == 'shellcheck' ]]; then
   # Get shellcheck
   UBIRD_GET_SOURCE_SHELLCHECK=1
-elif [[ "${target}" == 'shfmt' ]]; then
+elif [[ "${source_target}" == 'shfmt' ]]; then
   # Get shfmt
   UBIRD_GET_SOURCE_SHFMT=1
-elif [[ "${target}" == 'uassets-main' ]]; then
+elif [[ "${source_target}" == 'uassets-main' ]]; then
   # Get uAssets (main)
   UBIRD_GET_SOURCE_UASSETS_MAIN=1
-elif [[ "${target}" == 'uassets-prod' ]]; then
+elif [[ "${source_target}" == 'uassets-prod' ]]; then
   # Get uAssets (prod)
   UBIRD_GET_SOURCE_UASSETS_PROD=1
-elif [[ "${target}" == 'ublock' ]]; then
+elif [[ "${source_target}" == 'ublock' ]]; then
   # Get uBlock Origin
   UBIRD_GET_SOURCE_UBLOCK=1
-elif [[ "${target}" == 'uv' ]]; then
+elif [[ "${source_target}" == 'uv' ]]; then
   # Get + set-up uv
   UBIRD_GET_SOURCE_UV=1
-elif [[ "${target}" == 'all' ]]; then
+elif [[ "${source_target}" == 'all' ]]; then
   # If no argument is specified (or argument is set to "all"), just get everything
   UBIRD_GET_SOURCE_PYTHON=1
   UBIRD_GET_SOURCE_UASSETS_MAIN=1
@@ -74,7 +77,7 @@ elif [[ "${target}" == 'all' ]]; then
     UBIRD_GET_SOURCE_SHFMT=1
   fi
 else
-  echo_red_text "ERROR: Invalid target: ${target}\n You must enter one of the following:"
+  echo_red_text "ERROR: Invalid target: '${source_target}'\n You must enter one of the following:"
   echo 'All:              all (Default)'
   echo 'Python:           python'
   echo 'shellcheck:       shellcheck'
@@ -83,7 +86,7 @@ else
   echo 'uAssets (prod):   uassets-prod'
   echo 'uBlock Origin:    ublock'
   echo 'uv:               uv'
-  exit 1
+  return 1
 fi
 readonly UBIRD_GET_SOURCE_PYTHON
 readonly UBIRD_GET_SOURCE_SHELLCHECK
@@ -99,15 +102,12 @@ UBIRD_GET_SOURCE_CHECKSUM_UPDATE=0
 if [[ "${mode}" == 'checksum-update' ]]; then
   UBIRD_GET_SOURCE_CHECKSUM_UPDATE=1
 elif [[ "${mode}" != 'download' ]]; then
-  echo_red_text "ERROR: Invalid mode: ${mode}\n You must enter one of the following:"
+  echo_red_text "ERROR: Invalid mode: '${mode}'\n You must enter one of the following:"
   echo 'Download:                     download (Default)'
   echo 'Download + update checksums:  checksum-update'
-  exit 1
+  return 1
 fi
 readonly UBIRD_GET_SOURCE_CHECKSUM_UPDATE
-
-# Include version info
-source "${UBIRD_VERSIONS}" || exit 1
 
 # Back-up (and remove) a file if it exists
 function backup_file() {
@@ -118,23 +118,20 @@ function backup_file() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please provide the file path!'
     print_usage
-    exit 1
+    return 1
   fi
 
   # Ensure we have basename
-  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || exit 1
+  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || return 1
 
   # Ensure we have cp
-  verify_exec "${UBIRD_CP}" 'UBIRD_CP' || exit 1
+  verify_exec "${UBIRD_CP}" 'UBIRD_CP' || return 1
 
   # Ensure we have dirname
-  verify_exec "${UBIRD_DIRNAME}" 'UBIRD_DIRNAME' || exit 1
+  verify_exec "${UBIRD_DIRNAME}" 'UBIRD_DIRNAME' || return 1
 
   # Ensure we have mkdir
-  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || exit 1
-
-  # Ensure we have rm
-  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || return 1
 
   local -r file="$1"
   local -r file_name="$("${UBIRD_BASENAME}" "${file}")"
@@ -157,23 +154,20 @@ function backup_dir() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please provide the directory path!'
     print_usage
-    exit 1
+    return 1
   fi
 
   # Ensure we have basename
-  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || exit 1
+  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || return 1
 
   # Ensure we have cp
-  verify_exec "${UBIRD_CP}" 'UBIRD_CP' || exit 1
+  verify_exec "${UBIRD_CP}" 'UBIRD_CP' || return 1
 
   # Ensure we have dirname
-  verify_exec "${UBIRD_DIRNAME}" 'UBIRD_DIRNAME' || exit 1
+  verify_exec "${UBIRD_DIRNAME}" 'UBIRD_DIRNAME' || return 1
 
   # Ensure we have mkdir
-  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || exit 1
-
-  # Ensure we have rm
-  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || return 1
 
   local -r dir="$1"
   local -r dir_name="$("${UBIRD_BASENAME}" "${dir}")"
@@ -196,23 +190,20 @@ function restore_file() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please provide the file path!'
     print_usage
-    exit 1
+    return 1
   fi
 
   # Ensure we have basename
-  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || exit 1
+  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || return 1
 
   # Ensure we have cp
-  verify_exec "${UBIRD_CP}" 'UBIRD_CP' || exit 1
+  verify_exec "${UBIRD_CP}" 'UBIRD_CP' || return 1
 
   # Ensure we have dirname
-  verify_exec "${UBIRD_DIRNAME}" 'UBIRD_DIRNAME' || exit 1
+  verify_exec "${UBIRD_DIRNAME}" 'UBIRD_DIRNAME' || return 1
 
   # Ensure we have mkdir
-  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || exit 1
-
-  # Ensure we have rm
-  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || return 1
 
   local -r file="$1"
   local -r file_name="$("${UBIRD_BASENAME}" "${file}")"
@@ -235,23 +226,20 @@ function restore_dir() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please provide the directory path!'
     print_usage
-    exit 1
+    return 1
   fi
 
   # Ensure we have basename
-  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || exit 1
+  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || return 1
 
   # Ensure we have cp
-  verify_exec "${UBIRD_CP}" 'UBIRD_CP' || exit 1
+  verify_exec "${UBIRD_CP}" 'UBIRD_CP' || return 1
 
   # Ensure we have dirname
-  verify_exec "${UBIRD_DIRNAME}" 'UBIRD_DIRNAME' || exit 1
+  verify_exec "${UBIRD_DIRNAME}" 'UBIRD_DIRNAME' || return 1
 
   # Ensure we have mkdir
-  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || exit 1
-
-  # Ensure we have rm
-  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+  verify_exec "${UBIRD_MKDIR}" 'UBIRD_MKDIR' || return 1
 
   local -r dir="$1"
   local -r dir_name="$("${UBIRD_BASENAME}" "${dir}")"
@@ -274,32 +262,29 @@ function update_checksum() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text "ERROR: Please provide the file's current checksum!"
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${2+x}" ]]; then
     echo_red_text "ERROR: Please provide the file's new checksum!"
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${3+x}" ]]; then
     echo_red_text 'ERROR: Please provide the file path!'
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${4+x}" ]]; then
     echo_red_text 'ERROR: Please provide the checksum type!'
     print_usage
-    exit 1
+    return 1
   fi
 
   # Ensure we have GNU sed
-  verify_exec "${UBIRD_SED}" 'UBIRD_SED' || exit 1
-
-  # Ensure we can update `versions.sh`
-  verify_file "${UBIRD_VERSIONS}" || exit 1
+  verify_exec "${UBIRD_SED}" 'UBIRD_SED' || return 1
 
   local -r old_checksum="$1"
   local -r new_checksum="$2"
@@ -316,7 +301,7 @@ function update_checksum() {
     local -r checksum_type_pretty='SHA512sum'
   else
     echo_red_text "ERROR: Unsupported checksum type: '${checksum_type}'!"
-    exit 1
+    return 1
   fi
 
   if [[ "${old_checksum}" == "${new_checksum}" ]]; then
@@ -339,26 +324,23 @@ function validate_checksum() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text "ERROR: Please provide the file's expected checksum!"
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${2+x}" ]]; then
     echo_red_text 'ERROR: Please provide the file path!'
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${3+x}" ]]; then
     echo_red_text 'ERROR: Please provide the checksum type!'
     print_usage
-    exit 1
+    return 1
   fi
 
   # Ensure we have GNU awk
-  verify_exec "${UBIRD_AWK}" 'UBIRD_AWK' || exit 1
-
-  # Ensure we have rm
-  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+  verify_exec "${UBIRD_AWK}" 'UBIRD_AWK' || return 1
 
   local -r expected_checksum="$1"
   local -r file="$2"
@@ -366,14 +348,14 @@ function validate_checksum() {
 
   if [[ "${checksum_type}" == 'md5sum' ]]; then
     # Ensure we have md5sum
-    verify_exec "${UBIRD_MD5SUM}" 'UBIRD_MD5SUM' || exit 1
+    verify_exec "${UBIRD_MD5SUM}" 'UBIRD_MD5SUM' || return 1
   else
     # Ensure we have shasum
-    verify_exec "${UBIRD_SHASUM}" 'UBIRD_SHASUM' || exit 1
+    verify_exec "${UBIRD_SHASUM}" 'UBIRD_SHASUM' || return 1
   fi
 
   # Ensure our file to validate is valid
-  verify_file "${file}" || exit 1
+  verify_file "${file}" || return 1
 
   if [[ "${checksum_type}" == 'md5sum' ]]; then
     local -r checksum_type_pretty='MD5sum'
@@ -389,7 +371,7 @@ function validate_checksum() {
     local -r local_checksum=$("${UBIRD_SHASUM}" -a 512 "${file}" | "${UBIRD_AWK}" '{print $1}')
   else
     echo_red_text "ERROR: Unsupported checksum type: '${checksum_type}'!"
-    exit 1
+    return 1
   fi
 
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
@@ -402,7 +384,7 @@ function validate_checksum() {
     # If checksum validation fails, also just remove the file
     "${UBIRD_RM}" -f "${file}"
 
-    exit 1
+    return 1
   else
     echo_green_text "SUCCESS: Validated checksum (${checksum_type_pretty}) for file: '${file}'!"
     echo "${checksum_type_pretty}: '${local_checksum}'"
@@ -418,26 +400,26 @@ function download_file() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please provide the URL for the file to download!'
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${2+x}" ]]; then
     echo_red_text 'ERROR: Please provide the output file path!'
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${3+x}" ]]; then
     echo_red_text "ERROR: Please provide the file's SHA512sum!"
     print_usage
-    exit 1
+    return 1
   fi
 
   # Ensure we have basename
-  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || exit 1
+  verify_exec "${UBIRD_BASENAME}" 'UBIRD_BASENAME' || return 1
 
-  # Ensure we have rm
-  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+  # Ensure we have `UBIRD_EXTERNAL`
+  verify_env "${UBIRD_EXTERNAL}" 'UBIRD_EXTERNAL' || return 1
 
   local -r url="$1"
   local -r file_in="$2"
@@ -498,10 +480,10 @@ function download_file() {
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
     if [[ "${UBIRD_DOWNLOAD_FAILED}" == 1 ]]; then
       echo_red_text 'ERROR: Download failed!'
-      exit 1
+      return 1
     elif [[ "${UBIRD_CHECKSUM_FAILED}" == 1 ]]; then
       echo_red_text 'ERROR: Failed to update checksum!'
-      exit 1
+      return 1
     else
       return 0
     fi
@@ -525,7 +507,7 @@ function download_file() {
       return 1
     else
       echo_red_text 'ERROR: Download failed!'
-      exit 1
+      return 1
     fi
   fi
 }
@@ -539,23 +521,26 @@ function download_and_extract() {
   if [[ -z "${1+x}" ]]; then
     echo_red_text 'ERROR: Please provide the URL for the archive to download!'
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${2+x}" ]]; then
     echo_red_text 'ERROR: Please provide the path that the archive should be extracted to!'
     print_usage
-    exit 1
+    return 1
   fi
 
   if [[ -z "${3+x}" ]]; then
     echo_red_text "ERROR: Please provide the archive's SHA512sum!"
     print_usage
-    exit 1
+    return 1
   fi
 
-  # Ensure we have rm
-  verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+  # Ensure we have `UBIRD_EXTERNAL`
+  verify_env "${UBIRD_EXTERNAL}" 'UBIRD_EXTERNAL' || return 1
+
+  # Ensure we have `UBIRD_DOWNLOADS`
+  verify_env "${UBIRD_DOWNLOADS}" 'UBIRD_DOWNLOADS' || return 1
 
   local -r url="$1"
   local -r path="$2"
@@ -614,7 +599,7 @@ function download_and_extract() {
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
     if [[ "${UBIRD_DOWNLOAD_FAILED}" == 1 ]]; then
       echo_red_text "ERROR: Download for archive failed: '${url}'!"
-      exit 1
+      return 1
     else
       return 0
     fi
@@ -628,7 +613,7 @@ function download_and_extract() {
       return 1
     else
       echo_red_text "ERROR: Download for archive failed: '${url}'!"
-      exit 1
+      return 1
     fi
   fi
 
@@ -641,28 +626,34 @@ function download_and_extract() {
 
 # Get Python
 function get_python() {
+  # Ensure we have `UBIRD_PYTHON_DIR`
+  verify_env "${UBIRD_PYTHON_DIR}" 'UBIRD_PYTHON_DIR' || return 1
+
   # Ensure we have `UBIRD_PYTHON_GIT_RELEASE`
-  if [[ -z "${UBIRD_PYTHON_GIT_RELEASE+x}" ]] || [[ "${UBIRD_PYTHON_GIT_RELEASE}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_PYTHON_GIT_RELEASE' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_PYTHON_GIT_RELEASE}" 'UBIRD_PYTHON_GIT_RELEASE' || return 1
 
   # Ensure we have `UBIRD_PYTHON_VERSION`
-  if [[ -z "${UBIRD_PYTHON_VERSION+x}" ]] || [[ "${UBIRD_PYTHON_VERSION}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_PYTHON_VERSION' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_PYTHON_VERSION}" 'UBIRD_PYTHON_VERSION' || return 1
 
   # If all we're doing is updating the checksum, we don't care about existing installations
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]]; then
-    # Ensure we have rm
-    verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
-
     # Ensure we have uv
     verify_exec "${UBIRD_UV}" 'UBIRD_UV' || {
       echo_red_text "ERROR: Unable to download and install Python without uv!"
-      exit 1
+      return 1
     }
+
+    # Ensure we have `UBIRD_PYENV_DIR`
+    verify_env "${UBIRD_PYENV_DIR}" 'UBIRD_PYENV_DIR' || return 1
+
+    # Ensure we have `UBIRD_UV_CACHE`
+    verify_env "${UBIRD_UV_CACHE}" 'UBIRD_UV_CACHE' || return 1
+
+    # Ensure we have `UBIRD_UV_LOCAL`
+    verify_env "${UBIRD_UV_LOCAL}" 'UBIRD_UV_LOCAL' || return 1
+
+    # Ensure we have `UBIRD_UV_PYTHON`
+    verify_env "${UBIRD_UV_PYTHON}" 'UBIRD_UV_PYTHON' || return 1
 
     if [[ -d "${UBIRD_PYENV_DIR}" ]]; then
       echo_red_text "The Python environment is already set-up at path: '${UBIRD_PYENV_DIR}'!"
@@ -699,8 +690,20 @@ function get_python() {
   local -r base_output="${UBIRD_PYTHON_DIR}/${UBIRD_PYTHON_GIT_RELEASE}"
 
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
+    echo_red_text 'Downloading Python (Linux - ARM)...'
+    download_file "${base_url}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-armv7-unknown-linux-gnueabihf-install_only_stripped.tar.gz" "${base_output}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-armv7-unknown-linux-gnueabihf-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_LINUX_ARM}"
+
     echo_red_text 'Downloading Python (Linux - ARM64)...'
     download_file "${base_url}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz" "${base_output}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_LINUX_ARM64}"
+
+    echo_red_text 'Downloading Python (Linux - PPC64)...'
+    download_file "${base_url}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-ppc64le-unknown-linux-gnu-install_only_stripped.tar.gz" "${base_output}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-ppc64le-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_LINUX_PPC64}"
+
+    echo_red_text 'Downloading Python (Linux - RISC-V)...'
+    download_file "${base_url}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-riscv64-unknown-linux-gnu-install_only_stripped.tar.gz" "${base_output}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-riscv64-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_LINUX_RISCV}"
+
+    echo_red_text 'Downloading Python (Linux - s390x)...'
+    download_file "${base_url}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-s390x-unknown-linux-gnu-install_only_stripped.tar.gz" "${base_output}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-s390x-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_LINUX_S390X}"
 
     echo_red_text 'Downloading Python (Linux - x86_64)...'
     download_file "${base_url}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz" "${base_output}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_LINUX_X86_64}"
@@ -711,35 +714,64 @@ function get_python() {
     echo_red_text 'Downloading Python (OS X - x86_64)...'
     download_file "${base_url}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-x86_64-apple-darwin-install_only_stripped.tar.gz" "${base_output}/cpython-${UBIRD_PYTHON_VERSION}+${UBIRD_PYTHON_GIT_RELEASE}-x86_64-apple-darwin-install_only_stripped.tar.gz" "${UBIRD_PYTHON_SHA512SUM_OSX_X86_64}"
   else
-    # Ensure we have rm
-    verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
-
     # Set our platform
     if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
       local -r UBIRD_PYTHON_PLATFORM='apple-darwin'
+    elif [[ "${UBIRD_PLATFORM}" == 'linux' ]]; then
+      if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm' ]]; then
+        local -r UBIRD_PYTHON_PLATFORM='unknown-linux-gnueabihf'
+      else
+        local -r UBIRD_PYTHON_PLATFORM='unknown-linux-gnu'
+      fi
     else
-      local -r UBIRD_PYTHON_PLATFORM='unknown-linux-gnu'
+      echo_red_text "ERROR: Unsupported platform for Python: '${UBIRD_PLATFORM}'!"
+      return 1
     fi
 
     # Set our platform architecture
-    if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
+    if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm' ]]; then
+      local -r UBIRD_PYTHON_ARCH='armv7'
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
       local -r UBIRD_PYTHON_ARCH='aarch64'
-    else
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 'ppc64' ]]; then
+      local -r UBIRD_PYTHON_ARCH='powerpc64le'
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 'riscv' ]]; then
+      local -r UBIRD_PYTHON_ARCH='riscv64gc'
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 's390x' ]]; then
+      local -r UBIRD_PYTHON_ARCH='s390x'
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
       local -r UBIRD_PYTHON_ARCH='x86_64'
+    else
+      echo_red_text "ERROR: Unsupported architecture for Python: '${UBIRD_PLATFORM_ARCH}'!"
+      return 1
     fi
 
     # Set our checksum to verify
-    if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
-      if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+    if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+      if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
         local -r UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_OSX_ARM64}"
-      else
-        local -r UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_LINUX_ARM64}"
-      fi
-    else
-      if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
         local -r UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_OSX_X86_64}"
       else
+        echo_red_text "ERROR: Unsupported architecture for Python on OS X: '${UBIRD_PLATFORM_ARCH}'!"
+        return 1
+      fi
+    elif [[ "${UBIRD_PLATFORM}" == 'linux' ]]; then
+      if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm' ]]; then
+        local -r UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_LINUX_ARM}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
+        local -r UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_LINUX_ARM64}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'ppc64' ]]; then
+        local -r UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_LINUX_PPC64}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'riscv' ]]; then
+        local -r UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_LINUX_RISCV}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 's390x' ]]; then
+        local -r UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_LINUX_S390X}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
         local -r UBIRD_PYTHON_SHA512SUM="${UBIRD_PYTHON_SHA512SUM_LINUX_X86_64}"
+      else
+        echo_red_text "ERROR: Unsupported architecture for Python on Linux: '${UBIRD_PLATFORM_ARCH}'!"
+        return 1
       fi
     fi
 
@@ -767,7 +799,7 @@ function get_python() {
       restore_dir "${UBIRD_UV_PYTHON}"
       restore_dir "${UBIRD_UV_LOCAL}/python-cache"
       "${UBIRD_RM}" -rf "${UBIRD_EXTERNAL}/temp"
-      exit 1
+      return 1
     elif [[ "${UBIRD_PERFORM_POST_DOWNLOAD}" == 1 ]]; then
       echo_green_text "SUCCESS: Downloaded Python to path: '${dl_output}'!"
 
@@ -783,7 +815,7 @@ function get_python() {
         restore_dir "${UBIRD_UV_PYTHON}"
         restore_dir "${UBIRD_UV_LOCAL}/python-cache"
         "${UBIRD_RM}" -rf "${UBIRD_EXTERNAL}/temp"
-        exit 1
+        return 1
       fi
 
       echo_red_text "Creating Python environment at path: '${UBIRD_PYENV_DIR}'..."
@@ -794,7 +826,7 @@ function get_python() {
         echo_red_text "ERROR: Unable to set-up Python environment at path: '${UBIRD_PYENV_DIR}'!"
         restore_dir "${UBIRD_PYENV_DIR}"
         "${UBIRD_RM}" -rf "${UBIRD_EXTERNAL}/temp"
-        exit 1
+        return 1
       else
         echo_green_text "SUCCESS: Set-up Python environment at path: '${UBIRD_PYENV_DIR}'!"
       fi
@@ -804,11 +836,14 @@ function get_python() {
 
 # Get shellcheck
 function get_shellcheck() {
+  # Ensure we have `UBIRD_SHELLCHECK`
+  verify_env "${UBIRD_SHELLCHECK}" 'UBIRD_SHELLCHECK' || return 1
+
+  # Ensure we have `UBIRD_SHELLCHECK_DIR`
+  verify_env "${UBIRD_SHELLCHECK_DIR}" 'UBIRD_SHELLCHECK_DIR' || return 1
+
   # Ensure we have `UBIRD_SHELLCHECK_VERSION`
-  if [[ -z "${UBIRD_SHELLCHECK_VERSION+x}" ]] || [[ "${UBIRD_SHELLCHECK_VERSION}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_SHELLCHECK_VERSION' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_SHELLCHECK_VERSION}" 'UBIRD_SHELLCHECK_VERSION' || return 1
 
   # Base download URL
   local -r base_url="https://github.com/koalaman/shellcheck/releases/download/${UBIRD_SHELLCHECK_VERSION}"
@@ -829,29 +864,41 @@ function get_shellcheck() {
     # Set our platform
     if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
       local -r UBIRD_SHELLCHECK_PLATFORM='darwin'
-    else
+    elif [[ "${UBIRD_PLATFORM}" == 'linux' ]]; then
       local -r UBIRD_SHELLCHECK_PLATFORM='linux'
+    else
+      echo_red_text "ERROR: Unsupported platform for shellcheck: '${UBIRD_PLATFORM}'!"
+      return 1
     fi
 
     # Set our platform architecture
     if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
       local -r UBIRD_SHELLCHECK_ARCH='aarch64'
-    else
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
       local -r UBIRD_SHELLCHECK_ARCH='x86_64'
+    else
+      echo_red_text "ERROR: Unsupported architecture for shellcheck: '${UBIRD_PLATFORM_ARCH}'!"
+      return 1
     fi
 
     # Set our checksum to verify
-    if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
-      if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+    if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+      if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
         local -r UBIRD_SHELLCHECK_SHA512SUM="${UBIRD_SHELLCHECK_SHA512SUM_OSX_ARM64}"
-      else
-        local -r UBIRD_SHELLCHECK_SHA512SUM="${UBIRD_SHELLCHECK_SHA512SUM_LINUX_ARM64}"
-      fi
-    else
-      if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
         local -r UBIRD_SHELLCHECK_SHA512SUM="${UBIRD_SHELLCHECK_SHA512SUM_OSX_X86_64}"
       else
+        echo_red_text "ERROR: Unsupported architecture for shellcheck on OS X: '${UBIRD_PLATFORM_ARCH}'!"
+        return 1
+      fi
+    elif [[ "${UBIRD_PLATFORM}" == 'linux' ]]; then
+      if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
+        local -r UBIRD_SHELLCHECK_SHA512SUM="${UBIRD_SHELLCHECK_SHA512SUM_LINUX_ARM64}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
         local -r UBIRD_SHELLCHECK_SHA512SUM="${UBIRD_SHELLCHECK_SHA512SUM_LINUX_X86_64}"
+      else
+        echo_red_text "ERROR: Unsupported architecture for shellcheck on Linux: '${UBIRD_PLATFORM_ARCH}'!"
+        return 1
       fi
     fi
 
@@ -861,7 +908,7 @@ function get_shellcheck() {
     if [[ "${UBIRD_PERFORM_POST_DOWNLOAD}" == 1 ]]; then
       # Set-up the linting pre-commit hook
       if [[ "${UBIRD_CI}" != 1 ]] && [[ -x "${UBIRD_GIT}" ]] && [[ ! -f "${UBIRD_BUILD}/set-hook" ]]; then
-        /bin/bash "${UBIRD_SCRIPTS}/lint-hook.sh"
+        source "${UBIRD_SCRIPTS}/lint-hook.sh"
       fi
 
       echo_green_text "SUCCESS: Set-up shellcheck at path: '${UBIRD_SHELLCHECK}'!"
@@ -871,16 +918,16 @@ function get_shellcheck() {
 
 # Get shfmt
 function get_shfmt() {
+  # Ensure we have `UBIRD_SHFMT`
+  verify_env "${UBIRD_SHFMT}" 'UBIRD_SHFMT' || return 1
+
   # Ensure we have `UBIRD_SHFMT_VERSION`
-  if [[ -z "${UBIRD_SHFMT_VERSION+x}" ]] || [[ "${UBIRD_SHFMT_VERSION}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_SHFMT_VERSION' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_SHFMT_VERSION}" 'UBIRD_SHFMT_VERSION' || return 1
 
   # If all we're doing is updating the checksum, we don't care about existing installations
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]]; then
     # Ensure we have chmod
-    verify_exec "${UBIRD_CHMOD}" 'UBIRD_CHMOD' || exit 1
+    verify_exec "${UBIRD_CHMOD}" 'UBIRD_CHMOD' || return 1
   fi
 
   # Base download URL
@@ -902,29 +949,41 @@ function get_shfmt() {
     # Set our platform
     if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
       local -r UBIRD_SHFMT_PLATFORM='darwin'
-    else
+    elif [[ "${UBIRD_PLATFORM}" == 'linux' ]]; then
       local -r UBIRD_SHFMT_PLATFORM='linux'
+    else
+      echo_red_text "ERROR: Unsupported platform for shfmt: '${UBIRD_PLATFORM}'!"
+      return 1
     fi
 
     # Set our platform architecture
     if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
       local -r UBIRD_SHFMT_ARCH='arm64'
-    else
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
       local -r UBIRD_SHFMT_ARCH='amd64'
+    else
+      echo_red_text "ERROR: Unsupported architecture for shfmt: '${UBIRD_PLATFORM_ARCH}'!"
+      return 1
     fi
 
     # Set our checksum to verify
-    if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
-      if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+    if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+      if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
         local -r UBIRD_SHFMT_SHA512SUM="${UBIRD_SHFMT_SHA512SUM_OSX_ARM64}"
-      else
-        local -r UBIRD_SHFMT_SHA512SUM="${UBIRD_SHFMT_SHA512SUM_LINUX_ARM64}"
-      fi
-    else
-      if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
         local -r UBIRD_SHFMT_SHA512SUM="${UBIRD_SHFMT_SHA512SUM_OSX_X86_64}"
       else
+        echo_red_text "ERROR: Unsupported architecture for shfmt on OS X: '${UBIRD_PLATFORM_ARCH}'!"
+        return 1
+      fi
+    elif [[ "${UBIRD_PLATFORM}" == 'linux' ]]; then
+      if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
+        local -r UBIRD_SHFMT_SHA512SUM="${UBIRD_SHFMT_SHA512SUM_LINUX_ARM64}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
         local -r UBIRD_SHFMT_SHA512SUM="${UBIRD_SHFMT_SHA512SUM_LINUX_X86_64}"
+      else
+        echo_red_text "ERROR: Unsupported architecture for shfmt on Linux: '${UBIRD_PLATFORM_ARCH}'!"
+        return 1
       fi
     fi
 
@@ -936,7 +995,7 @@ function get_shfmt() {
 
       # Set-up the linting pre-commit hook
       if [[ "${UBIRD_CI}" != 1 ]] && [[ -x "${UBIRD_GIT}" ]] && [[ ! -f "${UBIRD_BUILD}/set-hook" ]]; then
-        /bin/bash "${UBIRD_SCRIPTS}/lint-hook.sh"
+        source "${UBIRD_SCRIPTS}/lint-hook.sh"
       fi
 
       echo_green_text "SUCCESS: Set-up shfmt at path: '${UBIRD_SHFMT}'!"
@@ -946,17 +1005,14 @@ function get_shfmt() {
 
 # Get uBlock Origin
 function get_ublock() {
+  # Ensure we have `UBIRD_UBO`
+  verify_env "${UBIRD_UBO}" 'UBIRD_UBO' || return 1
+
   # Ensure we have `UBIRD_UBLOCK_COMMIT`
-  if [[ -z "${UBIRD_UBLOCK_COMMIT+x}" ]] || [[ "${UBIRD_UBLOCK_COMMIT}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_UBLOCK_COMMIT' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_UBLOCK_COMMIT}" 'UBIRD_UBLOCK_COMMIT' || return 1
 
   # Ensure we have `UBIRD_UBLOCK_SHA512SUM`
-  if [[ -z "${UBIRD_UBLOCK_SHA512SUM+x}" ]] || [[ "${UBIRD_UBLOCK_SHA512SUM}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_UBLOCK_SHA512SUM' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_UBLOCK_SHA512SUM}" 'UBIRD_UBLOCK_SHA512SUM' || return 1
 
   echo_red_text "Downloading uBlock Origin to path: '${UBIRD_UBO}'..."
   download_and_extract "https://github.com/gorhill/uBlock/archive/${UBIRD_UBLOCK_COMMIT}.tar.gz" "${UBIRD_UBO}" "${UBIRD_UBLOCK_SHA512SUM}"
@@ -967,17 +1023,14 @@ function get_ublock() {
 
 # Get uAssets (main)
 function get_uassets_main() {
+  # Ensure we have `UBIRD_UASSETS_MAIN`
+  verify_env "${UBIRD_UASSETS_MAIN}" 'UBIRD_UASSETS_MAIN' || return 1
+
   # Ensure we have `UBIRD_UASSETS_MAIN_COMMIT`
-  if [[ -z "${UBIRD_UASSETS_MAIN_COMMIT+x}" ]] || [[ "${UBIRD_UASSETS_MAIN_COMMIT}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_UASSETS_MAIN_COMMIT' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_UASSETS_MAIN_COMMIT}" 'UBIRD_UASSETS_MAIN_COMMIT' || return 1
 
   # Ensure we have `UBIRD_UASSETS_MAIN_SHA512SUM`
-  if [[ -z "${UBIRD_UASSETS_MAIN_SHA512SUM+x}" ]] || [[ "${UBIRD_UASSETS_MAIN_SHA512SUM}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_UASSETS_MAIN_SHA512SUM' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_UASSETS_MAIN_SHA512SUM}" 'UBIRD_UASSETS_MAIN_SHA512SUM' || return 1
 
   echo_red_text "Downloading uAssets (main) to path: '${UBIRD_UASSETS_MAIN}'..."
   download_and_extract "https://github.com/uBlockOrigin/uAssets/archive/${UBIRD_UASSETS_MAIN_COMMIT}.tar.gz" "${UBIRD_UASSETS_MAIN}" "${UBIRD_UASSETS_MAIN_SHA512SUM}"
@@ -988,17 +1041,14 @@ function get_uassets_main() {
 
 # Get uAssets (prod)
 function get_uassets_prod() {
+  # Ensure we have `UBIRD_UASSETS_PROD`
+  verify_env "${UBIRD_UASSETS_PROD}" 'UBIRD_UASSETS_PROD' || return 1
+
   # Ensure we have `UBIRD_UASSETS_PROD_COMMIT`
-  if [[ -z "${UBIRD_UASSETS_PROD_COMMIT+x}" ]] || [[ "${UBIRD_UASSETS_PROD_COMMIT}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_UASSETS_PROD_COMMIT' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_UASSETS_PROD_COMMIT}" 'UBIRD_UASSETS_PROD_COMMIT' || return 1
 
   # Ensure we have `UBIRD_UASSETS_PROD_SHA512SUM`
-  if [[ -z "${UBIRD_UASSETS_PROD_SHA512SUM+x}" ]] || [[ "${UBIRD_UASSETS_PROD_SHA512SUM}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_UASSETS_PROD_SHA512SUM' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_UASSETS_PROD_SHA512SUM}" 'UBIRD_UASSETS_PROD_SHA512SUM' || return 1
 
   echo_red_text "Downloading uAssets (prod) to path: '${UBIRD_UASSETS_PROD}'..."
   download_and_extract "https://github.com/uBlockOrigin/uAssets/archive/${UBIRD_UASSETS_PROD_COMMIT}.tar.gz" "${UBIRD_UASSETS_PROD}" "${UBIRD_UASSETS_PROD_SHA512SUM}"
@@ -1009,19 +1059,22 @@ function get_uassets_prod() {
 
 # Get + set-up uv
 function get_uv() {
+  # Ensure we have `UBIRD_UV`
+  verify_env "${UBIRD_UV}" 'UBIRD_UV' || return 1
+
+  # Ensure we have `UBIRD_UV_DIR`
+  verify_env "${UBIRD_UV_DIR}" 'UBIRD_UV_DIR' || return 1
+
   # Ensure we have `UBIRD_UV_VERSION`
-  if [[ -z "${UBIRD_UV_VERSION+x}" ]] || [[ "${UBIRD_UV_VERSION}" == "" ]]; then
-    echo_red_text "ERROR: 'UBIRD_UV_VERSION' is missing!"
-    exit 1
-  fi
+  verify_env "${UBIRD_UV_VERSION}" 'UBIRD_UV_VERSION' || return 1
 
   # If all we're doing is updating the checksum, we don't care about existing installations
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" != 1 ]]; then
-    # Ensure we have rm
-    verify_exec "${UBIRD_RM}" 'UBIRD_RM' || exit 1
+    # Ensure we have `UBIRD_UV_LOCAL`
+    verify_env "${UBIRD_UV_LOCAL}" 'UBIRD_UV_LOCAL' || return 1
 
     if [[ -d "${UBIRD_UV_DIR}" ]]; then
-      echo_red_text "Found existing installation at path: '${PHOENIX_UV_DIR}'!"
+      echo_red_text "Found existing installation at path: '${UBIRD_UV_DIR}'!"
       echo 'Continuing will remove this installation and related data.'
       read -p "Do you still want to continue? [y/N] " -n 1 -r
       echo
@@ -1039,8 +1092,20 @@ function get_uv() {
   local -r base_url="https://github.com/astral-sh/uv/releases/download/${UBIRD_UV_VERSION}"
 
   if [[ "${UBIRD_GET_SOURCE_CHECKSUM_UPDATE}" == 1 ]]; then
+    echo_red_text 'Downloading uv (Linux - ARM)...'
+    download_file "${base_url}/uv-armv7-unknown-linux-gnueabihf.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-linux-arm.tar.gz" "${UBIRD_UV_SHA512SUM_LINUX_ARM}"
+
     echo_red_text 'Downloading uv (Linux - ARM64)...'
     download_file "${base_url}/uv-aarch64-unknown-linux-gnu.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-linux-arm64.tar.gz" "${UBIRD_UV_SHA512SUM_LINUX_ARM64}"
+
+    echo_red_text 'Downloading uv (Linux - PPC64)...'
+    download_file "${base_url}/uv-powerpc64le-unknown-linux-gnu.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-linux-ppc64.tar.gz" "${UBIRD_UV_SHA512SUM_LINUX_PPC64}"
+
+    echo_red_text 'Downloading uv (Linux - RISC-V)...'
+    download_file "${base_url}/uv-riscv64gc-unknown-linux-gnu.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-linux-riscv.tar.gz" "${UBIRD_UV_SHA512SUM_LINUX_RISCV}"
+
+    echo_red_text 'Downloading uv (Linux - s390x)...'
+    download_file "${base_url}/uv-s390x-unknown-linux-gnu.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-linux-s390x.tar.gz" "${UBIRD_UV_SHA512SUM_LINUX_S390X}"
 
     echo_red_text 'Downloading uv (Linux - x86_64)...'
     download_file "${base_url}/uv-x86_64-unknown-linux-gnu.tar.gz" "${UBIRD_EXTERNAL}/temp/uv-checksum-update-linux-x86_64.tar.gz" "${UBIRD_UV_SHA512SUM_LINUX_X86_64}"
@@ -1054,29 +1119,61 @@ function get_uv() {
     # Set our platform
     if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
       local -r UBIRD_UV_PLATFORM='apple-darwin'
+    elif [[ "${UBIRD_PLATFORM}" == 'linux' ]]; then
+      if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm' ]]; then
+        local -r UBIRD_UV_PLATFORM='unknown-linux-gnueabihf'
+      else
+        local -r UBIRD_UV_PLATFORM='unknown-linux-gnu'
+      fi
     else
-      local -r UBIRD_UV_PLATFORM='unknown-linux-gnu'
+      echo_red_text "ERROR: Unsupported platform for uv: '${UBIRD_PLATFORM}'!"
+      return 1
     fi
 
     # Set our platform architecture
-    if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
+    if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm' ]]; then
+      local -r UBIRD_UV_ARCH='armv7'
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
       local -r UBIRD_UV_ARCH='aarch64'
-    else
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 'ppc64' ]]; then
+      local -r UBIRD_UV_ARCH='powerpc64le'
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 'riscv' ]]; then
+      local -r UBIRD_UV_ARCH='riscv64gc'
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 's390x' ]]; then
+      local -r UBIRD_UV_ARCH='s390x'
+    elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
       local -r UBIRD_UV_ARCH='x86_64'
+    else
+      echo_red_text "ERROR: Unsupported architecture for uv: '${UBIRD_PLATFORM_ARCH}'!"
+      return 1
     fi
 
     # Set our checksum to verify
-    if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
-      if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+    if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+      if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
         local -r UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_OSX_ARM64}"
-      else
-        local -r UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_LINUX_ARM64}"
-      fi
-    else
-      if [[ "${UBIRD_PLATFORM}" == 'darwin' ]]; then
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
         local -r UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_OSX_X86_64}"
       else
+        echo_red_text "ERROR: Unsupported architecture for uv on OS X: '${UBIRD_PLATFORM_ARCH}'!"
+        return 1
+      fi
+    elif [[ "${UBIRD_PLATFORM}" == 'linux' ]]; then
+      if [[ "${UBIRD_PLATFORM_ARCH}" == 'arm' ]]; then
+        local -r UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_LINUX_ARM}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'arm64' ]]; then
+        local -r UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_LINUX_ARM64}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'ppc64' ]]; then
+        local -r UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_LINUX_PPC64}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'riscv' ]]; then
+        local -r UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_LINUX_RISCV}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 's390x' ]]; then
+        local -r UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_LINUX_S390X}"
+      elif [[ "${UBIRD_PLATFORM_ARCH}" == 'x86_64' ]]; then
         local -r UBIRD_UV_SHA512SUM="${UBIRD_UV_SHA512SUM_LINUX_X86_64}"
+      else
+        echo_red_text "ERROR: Unsupported architecture for uv on Linux: '${UBIRD_PLATFORM_ARCH}'!"
+        return 1
       fi
     fi
 
@@ -1095,7 +1192,7 @@ function get_uv() {
       restore_dir "${UBIRD_UV_DIR}"
       restore_dir "${UBIRD_UV_LOCAL}"
       "${UBIRD_RM}" -rf "${UBIRD_EXTERNAL}/temp"
-      exit 1
+      return 1
     elif [[ "${UBIRD_PERFORM_POST_DOWNLOAD}" == 1 ]]; then
       echo_green_text "SUCCESS: Set-up uv at path: '${UBIRD_UV}'!"
     fi

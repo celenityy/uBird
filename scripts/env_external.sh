@@ -107,9 +107,6 @@ readonly UV_TOOL_DIR="${UBIRD_UV_LOCAL}/tools"
 export UV_TOOL_BIN_DIR
 export UV_TOOL_DIR
 
-# Include version info
-source "${UBIRD_VERSIONS}"
-
 ## Pin Python version
 readonly UV_PYTHON_CPYTHON_BUILD="${UBIRD_PYTHON_GIT_RELEASE}"
 export UV_PYTHON_CPYTHON_BUILD
