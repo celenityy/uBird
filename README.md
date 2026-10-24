@@ -9,7 +9,7 @@ uBird can be downloaded from [`https://addons.thunderbird.net`](https://addons.t
 - Latest release: [`https://releases.celenity.dev/addons/ubird/releases/ubird-latest.xpi`](https://releases.celenity.dev/addons/ubird/releases/ubird-latest.xpi)
 - By version *(Replace `{VERSION}` with your desired version)*: [`https://releases.celenity.dev/addons/ubird/releases/{VERSION}/ubird-{VERSION}.xpi`](https://releases.celenity.dev/addons/ubird/releases/{VERSION}/ubird-{VERSION}.xpi)
 
-`https://addons.thunderbird.net` add-on ID: **`ubird@celenity.dev`**
+`https://addons.thunderbird.net` add-on ID: **`uBird@celenity.dev`**
 
 `https://releases.celenity.dev` add-on ID: **`ubird-direct@celenity.dev`**
 
