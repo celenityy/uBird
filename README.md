@@ -9,7 +9,11 @@ uBird can be downloaded from [`https://addons.thunderbird.net`](https://addons.t
 - Latest release: [`https://releases.celenity.dev/addons/ubird/releases/ubird-latest.xpi`](https://releases.celenity.dev/addons/ubird/releases/ubird-latest.xpi)
 - By version *(Replace `{VERSION}` with your desired version)*: [`https://releases.celenity.dev/addons/ubird/releases/{VERSION}/ubird-{VERSION}.xpi`](https://releases.celenity.dev/addons/ubird/releases/{VERSION}/ubird-{VERSION}.xpi)
 
-## Why?
+`https://addons.thunderbird.net` add-on ID: **`ubird@celenity.dev`**
+
+`https://releases.celenity.dev` add-on ID: **`ubird-direct@celenity.dev`**
+
+## Motivation
 
 [For unclear reasons](https://github.com/gorhill/uBlock/commit/e016a63f7bfa9f80ad14c6c4ce21db2d26396556), uBlock Origin stopped creation of Thunderbird CI builds upstream. However, the scripts/resources to build Thunderbird still remain in their repo; so this project leverages those existing scripts/resources to continue creating builds of uBlock Origin for Thunderbird.
 
