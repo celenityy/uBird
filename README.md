@@ -4,10 +4,9 @@ Resources to build uBlock Origin for Thunderbird.
 
 ## Download
 
-uBird can be downloaded from [`https://addons.thunderbird.net`](https://addons.thunderbird.net/thunderbird/addon/ubird/), or directly from `https://releases.celenity.dev`:
+uBird can be downloaded from [`https://addons.celenity.dev`](https://addons.celenity.dev/addons/ubird/) or [`https://addons.thunderbird.net`](https://addons.thunderbird.net/thunderbird/addon/ubird/).
 
-- Latest release: [`https://releases.celenity.dev/addons/ubird/releases/ubird-latest.xpi`](https://releases.celenity.dev/addons/ubird/releases/ubird-latest.xpi)
-- By version *(Replace `{VERSION}` with your desired version)*: [`https://releases.celenity.dev/addons/ubird/releases/{VERSION}/ubird-{VERSION}.xpi`](https://releases.celenity.dev/addons/ubird/releases/{VERSION}/ubird-{VERSION}.xpi)
+Additionally, a link always pointing to the latest release can be found at: [`https://releases.celenity.dev/addons/ubird/releases/ubird-latest.xpi`](https://releases.celenity.dev/addons/ubird/releases/ubird-latest.xpi).
 
 `https://releases.celenity.dev` add-on ID: **`ubird-direct@celenity.dev`**
 
