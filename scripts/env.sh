@@ -241,8 +241,8 @@ function setup_path() {
   add_to_full_path "${UBIRD_PATCH}" 'UBIRD_PATCH' 'gpatch'
   add_to_full_path "${UBIRD_PATCH}" 'UBIRD_PATCH' 'patch'
   add_to_full_path "${UBIRD_PYTHON}" 'UBIRD_PYTHON' 'python'
-  add_to_full_path "${UBIRD_PYTHON}" 'UBIRD_PYTHON' 'python3'
-  add_to_full_path "${UBIRD_PYTHON}" 'UBIRD_PYTHON' 'python3.14'
+  add_to_full_path "${UBIRD_PYTHON}" 'UBIRD_PYTHON' "python${UBIRD_PYTHON_MAJOR_VERSION}"
+  add_to_full_path "${UBIRD_PYTHON}" 'UBIRD_PYTHON' "python${UBIRD_PYTHON_FULL_MAJOR_VERSION}"
   add_to_full_path "${UBIRD_RM}" 'UBIRD_RM' 'rm'
   add_to_full_path "${UBIRD_SED}" 'UBIRD_SED' 'gsed'
   add_to_full_path "${UBIRD_SED}" 'UBIRD_SED' 'sed'
