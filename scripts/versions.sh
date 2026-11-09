@@ -1,26 +1,26 @@
 # shellcheck shell=bash
 # uBlock Origin
-# Version: 1.75.4
+# Version: 1.76.0
 # https://github.com/gorhill/uBlock
-readonly UBIRD_UBLOCK_COMMIT='f417911934edb2d3e2700110803ed7fde6f51022'
-readonly UBIRD_UBLOCK_SHA512SUM='55b7d285b0d900870d94735bbb1e79e9c399f810b2227b5e6b06a5be2e9cd1c1b76d76e3e99a974771f63d76dd66ec92a3cf63a8664b150ff02804555e549f46'
-readonly UBIRD_UBLOCK_VERSION='1.75.4'
+readonly UBIRD_UBLOCK_COMMIT='aa9236cb351e369cbb68113dbe8175b87f3cd134'
+readonly UBIRD_UBLOCK_SHA512SUM='0111f87d90fd6ae7ebcfba773e19df8fc4fa9baafacbbce644123e2e7db247a7c7b73e563a15f74d9bf9674aa7aa3c1d91cf71501e78317301f1a06deffeec1d'
+readonly UBIRD_UBLOCK_VERSION='1.76.0'
 
 # uBird
 readonly UBIRD_VERSION="${UBIRD_UBLOCK_VERSION}"
 
 # This value is used for ex. producing reproducable archives, and its value should be bumped upon new releases
-readonly UBIRD_VERSION_DATE='2026.11.03'
+readonly UBIRD_VERSION_DATE='2026.11.09'
 
 # uAssets (main)
 # https://github.com/uBlockOrigin/uAssets/tree/master
-readonly UBIRD_UASSETS_MAIN_COMMIT='48b2d5630f16162de082d5c9c04bed25c91f666e'
-readonly UBIRD_UASSETS_MAIN_SHA512SUM='91780891f285a94ccc33d6be8dab46e312f56106d10cfe586355089ab15bafed520915357ed311c4797238db3a6ab8abb0585f4e1825d5f8ddda9accaf1181c2'
+readonly UBIRD_UASSETS_MAIN_COMMIT='6375a4e395537e2a5baf9ef487d2c462eeca393e'
+readonly UBIRD_UASSETS_MAIN_SHA512SUM='5580463e3293548980869be8fb46aad20a80b8ce2ccd1e38acfd9791484d244a9bb546c52323b2e53d977fa5ab782f51769f9d91fc1defe8f44574a5ade6488a'
 
 # uAssets (prod)
 # https://github.com/uBlockOrigin/uAssets/tree/gh-pages
-readonly UBIRD_UASSETS_PROD_COMMIT='593f6c8a760b1962a6514743388d53160e45b77d'
-readonly UBIRD_UASSETS_PROD_SHA512SUM='2dcc9a64784ac14811da87e279c4b34e12d5fe5a6ad11c6ccd40761e7efb430630471183f9bbbc7ba70bc97fb911479ca6bd450d6b176b30cf15b2519ff9274e'
+readonly UBIRD_UASSETS_PROD_COMMIT='41bec966e46a944739b44b2b2ddcb2357b3c6e4b'
+readonly UBIRD_UASSETS_PROD_SHA512SUM='323a9becb43cf55314ff5013cfe9f4a70beb0b721c76d5d2448f3495a6dc61c5b0ff5aba1bd77e92ced6e04ea55a8eaf82023b4d6ea6b4d5647975ff3c495fea'
 
 # Python
 # Version: 20261026 (3.15.2)
